@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>BUYSELL</title>
+    </head>
+    <body>
+        <h1>BUYSELL</h1><hr>
+        <h4>Информация о насосе</h4>
+        <b>Месторождение : ${pump-card.field}</b><br>
+        <b>Скважина: ${pump-card.wellID}</b><br>
+        <b>Типоразмер: ${pump-card.typeSize}</b><br>
+        <b>Глубина спуска: ${pump-card.pumpDepth}</b><br>
+        <b>Последняя дата отказа: ${pump-card.lastFailureDate}</b><br>
+        <hr>
+    </body>
+</html>

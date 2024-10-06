@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Менеджер данных</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; /* Шрифт для всего тела */
+            margin: 0; /* Убираем отступы */
+            padding: 0; /* Убираем внутренние отступы */
+        }
+
+        .tab-container {
+            display: flex; /* Используем flexbox для горизонтального выравнивания */
+            border-bottom: 1px solid #ccc; /* Разделительная линия между вкладками и содержимым */
+            overflow-x: auto; /* Позволяет прокручивать вкладки, если они не помещаются в окно */
+        }
+
+        .tab {
+            padding: 10px 20px; /* Отступы для вкладок */
+            cursor: pointer; /* Указатель при наведении */
+            border: 1px solid transparent; /* Скрываем границу по умолчанию */
+            border-bottom: none; /* Убираем нижнюю границу для вкладок */
+            background-color: #f1f1f1; /* Цвет фона вкладок */
+            margin-right: 5px; /* Отступ между вкладками */
+            white-space: nowrap; /* Не переносить текст на новую строку */
+        }
+
+        .tab:hover {
+            background-color: #ddd; /* Цвет фона при наведении */
+        }
+
+        .active {
+            font-weight: bold; /* Выделение активной вкладки */
+            background-color: white; /* Цвет фона активной вкладки */
+            border: 1px solid #ccc; /* Граница для активной вкладки */
+            border-bottom: none; /* Убираем нижнюю границу для активной вкладки */
+        }
+
+        .tab-content {
+            display: none; /* Скрываем содержимое всех вкладок по умолчанию */
+            padding: 15px; /* Отступ для содержимого */
+            border: 1px solid #ccc; /* Граница содержимого */
+        }
+    </style>
+    <script>
+        function openTab(tabId, event) {
+            var i, tabContent, tabLinks;
+
+            // Скрываем все содержимое вкладок
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+
+            // Убираем класс "active" со всех вкладок
+            tabLinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tabLinks.length; i++) {
+                tabLinks[i].classList.remove("active");
+            }
+
+            // Показываем выбранную вкладку
+            document.getElementById(tabId).style.display = "block";
+            event.currentTarget.classList.add("active");
+        }
+
+        // Функция для открытия первой вкладки при загрузке страницы
+        document.addEventListener("DOMContentLoaded", function() {
+            var firstTabKey = '${uploadedIndicatorsFiles?keys[0]}'; // Получаем первый ключ
+            openTab('tab_' + firstTabKey, event); // Открываем первую вкладку
+        });
+
+        function toggleCheckbox(selectedCheckbox) {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            let isChecked = selectedCheckbox.checked;
+            checkboxes.forEach(checkbox => {
+                if (checkbox !== selectedCheckbox) {
+                    checkbox.checked = false;
+                }
+            });
+            selectedCheckbox.checked = isChecked;
+        }
+
+        let uploadedIndicatorsFiles = ${uploadedIndicatorsFilesJson};
+
+        // Функция для обновления данных при изменении разделителя
+        function updateData() {
+            const separator = document.getElementById('data-splitter').value;
+
+            fetch('/pump-card/upload/parse-indicators', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ strings: data, sep: separator }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Обновляем вывод на странице
+                document.getElementById('output').innerHTML = data.join('<br>'); // Пример отображения
+            })
+            .catch((error) => {
+                console.error('Ошибка:', error);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h2>Менеджер данных</h2>
+    <table>
+        <tr>
+            <th scope="col">Разделительный знак</th>
+            <th scope="col">Имя скважины</th>
+            <td>
+                <input type="button" value="загрузить">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <select name="data-splitter" id="data-splitter" onchange="updateData()">
+                    <option value="\t">Табуляция</option>
+                    <option value=" ">Пробел</option>
+                    <option value=".">Точка</option>
+                    <option value=",">Запятая</option>
+                    <option value=";">Точка с запятой</option>
+                </select>
+            </td>
+            <td>
+                <label>
+                    <input type="checkbox" name="option" value="option1" onclick="toggleCheckbox(this)"> По имени файла
+                </label><br>
+                <label>
+                    <input type="checkbox" name="option" value="option2" onclick="toggleCheckbox(this)"> По столбцу файла
+                </label>
+            </td>
+            <td>
+
+            </td>
+        </tr>
+    </table>
+
+    <!-- Контейнер для вкладок -->
+    <div class="tab-container">
+        <#list uploadedIndicatorsFiles?keys as key>
+            <div class="tab" onclick="openTab('tab_${key}', event)">${key}</div>
+        </#list>
+    </div>
+
+    <!-- Контейнер для содержимого вкладок -->
+    <#list uploadedIndicatorsFiles?keys as key>
+        <div id="tab_${key}" class="tab-content">
+            <#list 0..9 as i>
+                <#if i < uploadedIndicatorsFiles[key]?size>
+                    <p>${uploadedIndicatorsFiles[key][i]}</p>
+                </#if>
+            </#list>
+        </div>
+    </#list>
+
+    <div id="output"></div>
+</body>
+</html>
