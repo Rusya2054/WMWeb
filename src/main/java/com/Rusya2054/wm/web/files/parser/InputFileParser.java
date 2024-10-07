@@ -53,7 +53,7 @@ public final class InputFileParser {
             });
 
             List<String> result = new ArrayList<>(strings.size()){{add(String.join(sep, columnIndexMap.keySet()));}};
-            strings.stream().skip(1).forEach(r->{
+            strings.stream().skip(1).filter(s -> s != null).forEach(r->{
                 String[] row = r.split(sep);
                 result.add(String.join(sep, columnIndexMap
                         .values()
@@ -73,7 +73,9 @@ public final class InputFileParser {
         List<String> lst = List.of("WellID\t2\t5523", "1\t213\t123");
         List<String> emptyList = List.of("");
         List<String> emptyList1 = new ArrayList<>();
-        InputFileParser.parseIndicatorsFile(lst, "\t").stream().forEach(System.out::println);
+        List<String> nullList = Arrays.asList("first", null, "second", "third", null);;
+        // InputFileParser.parseIndicatorsFile(lst, "\t").stream().forEach(System.out::println);
+        InputFileParser.parseIndicatorsFile(nullList, "\t").stream().forEach(System.out::println);
 
 //        InputFileParser.parseIndicatorsFile(emptyList, "\t").stream().forEach(System.out::println);
 //        InputFileParser.parseIndicatorsFile(emptyList1, "\t").stream().forEach(System.out::println);

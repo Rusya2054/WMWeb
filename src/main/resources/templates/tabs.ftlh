@@ -132,15 +132,15 @@
         </tr>
     </table>
     <div class="tab-container">
-        <#list uploadedIndicatorsFiles?keys as key>
+        <#list uploadedParsedIndicatorsFiles?keys as key>
             <div class="tab" onclick="openTab('tab_${key}', event)">${key}</div>
         </#list>
     </div>
 
-    <#list uploadedIndicatorsFiles?keys as key>
+    <#list uploadedParsedIndicatorsFiles?keys as key>
         <div id="tab_${key}" class="tab-content">
-            <#if (uploadedIndicatorsFiles[key]?size > 0)>
-                <#assign headerRow = uploadedIndicatorsFiles[key][0]?split("${separator}") />
+            <#if (uploadedParsedIndicatorsFiles[key]?size > 0)>
+                <#assign headerRow = uploadedParsedIndicatorsFiles[key][0]?split("${separator}") />
                 <table border="1">
                     <thead>
                         <tr>
@@ -151,9 +151,9 @@
                     </thead>
                     <tbody>
                         <#list 1..9 as i> <!-- Начинаем с 1, так как 0 - это заголовки -->
-                            <#if i < uploadedIndicatorsFiles[key]?size>
+                            <#if i < uploadedParsedIndicatorsFiles[key]?size>
                                 <tr>
-                                    <#assign rowData = uploadedIndicatorsFiles[key][i]?split("${separator}") />
+                                    <#assign rowData = uploadedParsedIndicatorsFiles[key][i]?split("${separator}") />
                                     <#list rowData as column>
                                         <td>${column}</td>
                                     </#list>

@@ -1,5 +1,6 @@
 package com.Rusya2054.wm.web.controllers;
 
+import com.Rusya2054.wm.web.files.parser.InputFileParser;
 import com.Rusya2054.wm.web.files.reader.IndicatorReader;
 import com.Rusya2054.wm.web.repositories.IndicatorRepository;
 import com.Rusya2054.wm.web.repositories.PumpCardRepository;
@@ -21,7 +22,7 @@ public class DataManagerController {
     private final IndicatorRepository indicatorRepository;
     private final PumpCardRepository pumpCardRepository;
 
-    private final Map<Long, List<MultipartFile>> sessionMemory;
+    private final Map<Long, Map<String, List<String>>> sessionMemory;
 
     @GetMapping("/pump-card")
     public String getDataManager( Model model){
@@ -34,29 +35,24 @@ public class DataManagerController {
     @PostMapping("/pump-card/upload")
     public String uploadFilesToDb(@RequestParam("files[]") List<MultipartFile> files, Model model){
         Map<String, List<String>> uploadedIndicatorsFiles = new HashMap<>(files.size());
+        Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(files.size());
         files.stream()
                 .filter(f->(f.getOriginalFilename().endsWith(".txt")| f.getOriginalFilename().endsWith(".data")))
                 .forEach(f->{
-            System.out.println("*".repeat(10));
-            System.out.println(f.getName());
-            System.out.println(f.getContentType());
-            System.out.println(f.getOriginalFilename());
-            System.out.println(f.getSize());
-            // TODO: создать статический репозиторий для хранения List<MultipartFile> files
-            // TODO: улучитить производительность
             try {
-                uploadedIndicatorsFiles.put(f.getOriginalFilename(), parseIndicatorsFile(IndicatorReader.readIndicatorsFile(f, 20), "\t"));
+                List<String> uploadedFile = IndicatorReader.readIndicatorsFile(f);
+                uploadedIndicatorsFiles.put(f.getOriginalFilename(), uploadedFile);
+                // TODO: парсинг 20 строк добавить перегрузку
+                uploadedParsedIndicatorsFiles.put(f.getOriginalFilename(), InputFileParser.parseIndicatorsFile(uploadedFile, "\t"));
             } catch (Exception e) {
                 e.getMessage();
             }
         });
-        // model.addAttribute("uploadedIndicatorsFiles", uploadedIndicatorsFiles);
         Long sessionID = (long)(Long.MAX_VALUE*Math.random());
-        sessionMemory.put(sessionID, files);
+        sessionMemory.put(sessionID, uploadedIndicatorsFiles);
         model.addAttribute("sessionID", sessionID);
         model.addAttribute("separator", "\t");
-        model.addAttribute("uploadedIndicatorsFiles", uploadedIndicatorsFiles);
-        // model.addAttribute("uploadedIndicatorsFiles", jsonFiles);
+        model.addAttribute("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
         return "tabs";
     }
 
@@ -69,29 +65,23 @@ public class DataManagerController {
 
     @PostMapping("/pump-card/upload/parse-indicators")
     public String dynamicParseIndicatorsFile(@RequestBody  RequestData requestData, Model model) {
-
         String separator = requestData.getSeparator();
         Long sessionID =Long.parseLong(requestData.getSessionID().replace(" ", ""));
-        Map<String, List<String>> uploadedIndicatorsFiles = new HashMap<>(100);
-
+        System.out.println(separator +" " + sessionID);
         if (this.sessionMemory.keySet().contains(sessionID)){
-            List<MultipartFile> files = this.sessionMemory.get(sessionID);
-
-            files.stream()
-                .filter(f->(f.getOriginalFilename().endsWith(".txt")| f.getOriginalFilename().endsWith(".data")))
-                .forEach(f->{
-            // TODO: улучитить производительность
-            try {
-                uploadedIndicatorsFiles.put(f.getOriginalFilename(), parseIndicatorsFile(IndicatorReader.readIndicatorsFile(f, 20), separator));
-            } catch (Exception e) {
-                e.getMessage();
-            }
-                });
+            Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemory.get(sessionID);
+            Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(uploadedIndicatorsFiles.size());
+            uploadedIndicatorsFiles
+                    .entrySet()
+                    .stream()
+                    .forEach(e->{
+                        uploadedParsedIndicatorsFiles.put(e.getKey(), InputFileParser.parseIndicatorsFile(e.getValue(), separator));
+                    });
+            model.addAttribute("sessionID", sessionID);
+            model.addAttribute("separator", separator);
+            model.addAttribute("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
         }
-        model.addAttribute("sessionID", sessionID);
-        model.addAttribute("separator", separator);
-        model.addAttribute("uploadedIndicatorsFiles", uploadedIndicatorsFiles);
-        return "tabs";
+        return "tabs ";
     }
 
 
