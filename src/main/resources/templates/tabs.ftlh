@@ -5,29 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Менеджер данных</title>
 </head>
+<style>
+    body {
+        font-family: Arial, sans-serif; /* Шрифт для всего тела */
+        margin: 0; /* Убираем отступы */
+        padding: 0; /* Убираем внутренние отступы */
+    }
+
+    .tab-container {
+        display: flex; /* Используем flexbox для горизонтального выравнивания */
+        border-bottom: 1px solid #ccc; /* Разделительная линия между вкладками и содержимым */
+        overflow-x: auto; /* Позволяет прокручивать вкладки, если они не помещаются в окно */
+    }
+
+    .tab {
+        padding: 10px 20px; /* Отступы для вкладок */
+        cursor: pointer; /* Указатель при наведении */
+        border: 1px solid transparent; /* Скрываем границу по умолчанию */
+        border-bottom: none; /* Убираем нижнюю границу для вкладок */
+        background-color: #f1f1f1; /* Цвет фона вкладок */
+        margin-right: 5px; /* Отступ между вкладками */
+        white-space: nowrap; /* Не переносить текст на новую строку */
+    }
+
+    .tab:hover {
+        background-color: #ddd; /* Цвет фона при наведении */
+    }
+
+    .active {
+        font-weight: bold; /* Выделение активной вкладки */
+        background-color: white; /* Цвет фона активной вкладки */
+        border: 1px solid #ccc; /* Граница для активной вкладки */
+        border-bottom: none; /* Убираем нижнюю границу для активной вкладки */
+    }
+
+    .tab-content {
+        display: none; /* Скрываем содержимое всех вкладок по умолчанию */
+        padding: 15px; /* Отступ для содержимого */
+        border: 1px solid #ccc; /* Граница содержимого */
+    }
+</style>
+
 <script>
     // Функция для обновления данных при изменении разделителя
     function updateData() {
         const separator = document.getElementById('data-splitter').value;
+        const sessionID = "${sessionID}";
 
-        const data = ['value1', 'value2'];
+        console.log('Session ID:', sessionID);
 
-        fetch('/pump-card/upload/parse-indicators', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ strings: data, sep: separator }),
-            }).then(response => {
-                console.log('Ответ сервера:', response);
-            }).catch(error => {
-                console.error('Ошибка:', error);
-            });
+        const data = {
+                sessionID: sessionID,
+                separator: separator
+            };
+
+        console.log(JSON.stringify(data));
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/pump-card/upload/parse-indicators", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                document.getElementById("response").innerHTML = xhr.responseText;
+            }
+        };
+        xhr.send(JSON.stringify(data));
     }
+
+
+    function openTab(tabId, event) {
+            var i, tabContent, tabLinks;
+
+            // Скрываем все содержимое вкладок
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+
+            // Убираем класс "active" со всех вкладок
+            tabLinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tabLinks.length; i++) {
+                tabLinks[i].classList.remove("active");
+            }
+
+            // Показываем выбранную вкладку
+            document.getElementById(tabId).style.display = "block";
+            event.currentTarget.classList.add("active");
+        }
+
+
 </script>
 
 
 <body>
+    ${sessionID}
     <h2>Менеджер данных</h2>
     <table>
         <tr>
@@ -40,7 +111,7 @@
         <tr>
             <td>
                 <select name="data-splitter" id="data-splitter" onchange="updateData()">
-                    <option value="\t">Табуляция</option>
+                    <option value="\t" selected>Табуляция</option>
                     <option value=" ">Пробел</option>
                     <option value=".">Точка</option>
                     <option value=",">Запятая</option>
@@ -60,48 +131,42 @@
             </td>
         </tr>
     </table>
-    <table id="data-table" border="1">
-        <thead>
-            <tr>
-                <th>File Name</th>
-                <th>Value 1</th>
-                <th>Value 2</th>
-                <th>Value 3</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div class="tab-container">
+        <#list uploadedIndicatorsFiles?keys as key>
+            <div class="tab" onclick="openTab('tab_${key}', event)">${key}</div>
+        </#list>
+    </div>
 
-    <script>
+    <#list uploadedIndicatorsFiles?keys as key>
+        <div id="tab_${key}" class="tab-content">
+            <#if (uploadedIndicatorsFiles[key]?size > 0)>
+                <#assign headerRow = uploadedIndicatorsFiles[key][0]?split("${separator}") />
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <#list headerRow as header>
+                                <th>${header}</th>
+                            </#list>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#list 1..9 as i> <!-- Начинаем с 1, так как 0 - это заголовки -->
+                            <#if i < uploadedIndicatorsFiles[key]?size>
+                                <tr>
+                                    <#assign rowData = uploadedIndicatorsFiles[key][i]?split("${separator}") />
+                                    <#list rowData as column>
+                                        <td>${column}</td>
+                                    </#list>
+                                </tr>
+                            </#if>
+                        </#list>
+                    </tbody>
+                </table>
+            <#else>
+                <p>Нет данных для отображения.</p>
+            </#if>
+        </div>
+    </#list>
 
-        const data = JSON.parse('${uploadedIndicatorsFiles}');
-
-        // Получаем доступ к tbody таблицы
-        const tableBody = document.querySelector('#data-table tbody');
-
-        // Проходим по ключам объекта
-        for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-                // Создаем новую строку таблицы
-                const row = document.createElement('tr');
-
-                // Создаем ячейку для ключа (имя файла)
-                const fileNameCell = document.createElement('td');
-                fileNameCell.textContent = key;
-                row.appendChild(fileNameCell);
-
-                // Создаем ячейки для значений массива
-                data[key].forEach(value => {
-                    const valueCell = document.createElement('td');
-                    valueCell.textContent = value;
-                    row.appendChild(valueCell);
-                });
-
-                // Добавляем строку в тело таблицы
-                tableBody.appendChild(row);
-            }
-        }
-    </script>
 </body>
 </html>
