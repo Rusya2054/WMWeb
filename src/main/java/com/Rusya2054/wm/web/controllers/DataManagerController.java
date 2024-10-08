@@ -33,7 +33,7 @@ public class DataManagerController {
     }
 
     @PostMapping("/pump-card/upload")
-    public String uploadFilesToDb(@RequestParam("files[]") List<MultipartFile> files, Model model){
+    public String uploadFilesToDb(@RequestParam(value = "files[]", required = false) List<MultipartFile> files, Model model){
         Map<String, List<String>> uploadedIndicatorsFiles = new HashMap<>(files.size());
         Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(files.size());
         files.stream()
@@ -77,13 +77,12 @@ public class DataManagerController {
                     .forEach(e->{
                         uploadedParsedIndicatorsFiles.put(e.getKey(), InputFileParser.parseIndicatorsFile(e.getValue(), separator));
                     });
+            // TODO: парсинг 20 строк добавить перегрузку
             model.addAttribute("sessionID", sessionID);
             model.addAttribute("separator", separator);
             model.addAttribute("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
         }
-        return "tabs ";
+        return "tabs";
     }
-
-
 
 }

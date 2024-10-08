@@ -48,30 +48,77 @@
 
 <script>
     // Функция для обновления данных при изменении разделителя
-    function updateData() {
+    function updateSep() {
         const separator = document.getElementById('data-splitter').value;
         const sessionID = "${sessionID}";
 
-        console.log('Session ID:', sessionID);
+
 
         const data = {
                 sessionID: sessionID,
                 separator: separator
             };
 
-        console.log(JSON.stringify(data));
 
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/pump-card/upload/parse-indicators", true);
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.onload = function () {
             if (xhr.status === 200) {
-                document.getElementById("response").innerHTML = xhr.responseText;
+                updateData();
+                // document.getElementById("response").innerHTML = xhr.responseText;
             }
         };
         xhr.send(JSON.stringify(data));
     }
 
+    function updateData(){
+        const separator = "${separator}";
+        var filesMap = {
+            <#list uploadedParsedIndicatorsFiles?keys as key>
+                "${key}": [
+                    <#list uploadedParsedIndicatorsFiles[key] as value>
+                        "${value}"<#if value_has_next>,</#if>
+                    </#list>
+                ]<#if key_has_next>,</#if>
+            </#list>
+        };
+        console.log(filesMap)
+        var tabContents = document.querySelectorAll('.tab-content');
+        tabContents.forEach(function(tabContent) {
+            // Очищаем содержимое вкладки
+            tabContent.innerHTML = "";
+        });
+
+        for (var key in filesMap){
+            // const values = filesMap[key];
+            const tabContent = document.getElementById("tab_" + key);
+
+            if (filesMap[key].length > 0){
+                const headerRow = filesMap[key][0].split(separator);
+
+                let tableHtml = '<table border="1"><thead><tr>';
+
+                headerRow.forEach(function(header) {
+                    tableHtml += "<th>"+header+"</th>";
+                });
+
+                for (let i = 1; i < 10; i++) {
+                    const rowData = filesMap[key][i].split(separator);
+                    tableHtml += "<tr>";
+                    rowData.forEach(function(column) {
+                        tableHtml += "<td>"+column+"</td>";
+                        console.log(column);
+                    });
+                    tableHtml += "</tr>";
+                }
+                tabContent.innerHTML = tableHtml;
+            }else {
+                // Если данных нет, выводим сообщение
+                tabContent.innerHTML = "<p>Нет данных для отображения.</p>";
+            }
+        }
+    }
 
     function openTab(tabId, event) {
             var i, tabContent, tabLinks;
@@ -110,7 +157,7 @@
         </tr>
         <tr>
             <td>
-                <select name="data-splitter" id="data-splitter" onchange="updateData()">
+                <select name="data-splitter" id="data-splitter" onchange="updateSep()">
                     <option value="\t" selected>Табуляция</option>
                     <option value=" ">Пробел</option>
                     <option value=".">Точка</option>
@@ -150,7 +197,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <#list 1..9 as i> <!-- Начинаем с 1, так как 0 - это заголовки -->
+                        <#list 1..9 as i>
                             <#if i < uploadedParsedIndicatorsFiles[key]?size>
                                 <tr>
                                     <#assign rowData = uploadedParsedIndicatorsFiles[key][i]?split("${separator}") />
