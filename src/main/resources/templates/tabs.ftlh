@@ -52,8 +52,6 @@
         const separator = document.getElementById('data-splitter').value;
         const sessionID = "${sessionID}";
 
-
-
         const requestData = {
                 sessionID: sessionID,
                 separator: separator
@@ -157,6 +155,27 @@
             }
         }
     }
+    function uploadToDb(){
+        const separator = document.getElementById('data-splitter').value;
+        const sessionID = "${sessionID}";
+        const byFileName = document.querySelector('input[name="option"][value="option1"]').checked
+
+        const requestData = {
+                sessionID: sessionID,
+                separator: separator,
+                byFileName: byFileName
+            };
+
+
+        fetch('/pump-card/upload/indicators', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+    }
 
 </script>
 
@@ -169,7 +188,7 @@
             <th scope="col">Разделительный знак</th>
             <th scope="col">Имя скважины</th>
             <td>
-                <input type="button" value="загрузить" href="/">
+                <input type="button" value="загрузить" onclick=uploadToDb()>
             </td>
         </tr>
         <tr>

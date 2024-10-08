@@ -41,24 +41,31 @@ public class DataManagerController {
                 .forEach(f->{
             try {
                 List<String> uploadedFile = IndicatorReader.readIndicatorsFile(f);
-                uploadedIndicatorsFiles.put(f.getOriginalFilename(), uploadedFile);
-                uploadedParsedIndicatorsFiles.put(f.getOriginalFilename(), InputFileParser.parseIndicatorsFile(uploadedFile, "\t", 20));
+                if (uploadedFile.size() > 20){
+                    // TODO: добавить оповещение или логгирование
+                    uploadedIndicatorsFiles.put(f.getOriginalFilename(), uploadedFile);
+                    uploadedParsedIndicatorsFiles.put(f.getOriginalFilename(), InputFileParser.parseIndicatorsFile(uploadedFile, "\t", 20));
+                }
             } catch (Exception e) {
                 e.getMessage();
             }
         });
-        Long sessionID = (long)(Long.MAX_VALUE*Math.random());
-        sessionMemory.put(sessionID, uploadedIndicatorsFiles);
-        model.addAttribute("sessionID", sessionID);
-        model.addAttribute("separator", "\t");
-        model.addAttribute("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
-        return "tabs";
+        if (!uploadedIndicatorsFiles.isEmpty()){
+            Long sessionID = (long)(Long.MAX_VALUE*Math.random());
+            sessionMemory.put(sessionID, uploadedIndicatorsFiles);
+            model.addAttribute("sessionID", sessionID);
+            model.addAttribute("separator", "\t");
+            model.addAttribute("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
+            return "tabs";
+        }
+        return "data-manager";
     }
 
     @Data
     public static class RequestData {
         private String sessionID ;
         private String separator;
+        private Boolean byFileName;
     }
 
     @PostMapping("/pump-card/upload/parse-indicators")
@@ -78,7 +85,6 @@ public class DataManagerController {
                     .forEach(e->{
                         uploadedParsedIndicatorsFiles.put(e.getKey(), InputFileParser.parseIndicatorsFile(e.getValue(), separator, 20));
                     });
-            // TODO: проверить если меньше 10 строк
             response.put("sessionID", sessionID);
             response.put("separator", separator);
             response.put("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
@@ -91,11 +97,18 @@ public class DataManagerController {
             // TODO: удаление сессии из памяти
 
         String separator = requestData.getSeparator();
+        Boolean byFileName = requestData.getByFileName();
+//        Boolean.valueOf()
         Long sessionID =Long.parseLong(requestData.getSessionID().replace(" ", ""));
         if (this.sessionMemory.keySet().contains(sessionID)){
-            System.out.println("123");
+//            InputFileParser.p
+            Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemory.get(sessionID);
+            uploadedIndicatorsFiles.entrySet().forEach(e->{
+                // TODO: парсим переводим в стандартный вид класса Indicator[]
+                List<String> uploadedIndicatorsFile =  e.getValue();
+            });
         }
-        return "tabs";
+        return "data-manager";
     }
 
 }

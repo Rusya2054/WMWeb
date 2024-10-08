@@ -1,5 +1,7 @@
 package com.Rusya2054.wm.web.files.parser;
 
+import com.Rusya2054.wm.web.files.template.Columns;
+
 import java.util.*;
 
 /**
@@ -8,30 +10,30 @@ import java.util.*;
 public final class InputFileParser {
 
     private static final Map<String, List<String>> parserMapTemplate = new LinkedHashMap<>(){{
-        put("WellID", List.of("Куст_Скв._М-е", "№ Скважины", "Well", "WellID", "wellID"));
-        put("RotationDirection", List.of("Напр.вращен", "Направление вращения", "Направление вращения\nРежим работы", "Напр. вращ.", "Напр. вращения", "RotationDirection"));
-        put("Date", List.of("Дата, Время", "Время", "Дата и время\nконтроллера", "Date"));
-        put("Frequency", List.of("F, Гц", "F. Гц", "Частота вращения , Гц", "Частота вращения ПЭД (Гц), Гц", "F\n(Гц)", "Fвых, Гц", "Рабочая частота", "Fтек, Гц", "Frequency"));
-        put("CurPhaseA", List.of("Ia, A", "Ia. A", "Ia\n(А)", "Ток фазы U, A", "Ia ПЭД, А", "Ток фазы A", "CurPhaseA"));
-        put("CurPhaseB", List.of("Ib, A", "Ib. A", "Ib\n(А)", "Ток фазы V, A", "Ib ПЭД, А", "Ток фазы B", "CurPhaseB"));
-        put("CurPhaseC", List.of("Ic, A", "Ic. A", "Ic\n(А)", "Ток фазы W, A", "Ic ПЭД, А", "Ток фазы C", "CurPhaseC"));
-        put("CurrentImbalance", List.of("Дисбаланс по току , %", "Дисбаланс тока, %", "Дисб. I, %", "Дисб.I", "Дисб.I\n(%)", "Дисб.I ПЭД, %", "Дисбаланс токов", "CurrentImbalance"));
-        put("LineCurrent", List.of("Id, A", "Id. A", "Id\n(А)", "Ток на накопителе, A", "Ток(Id)", "LineCurrent"));
-        put("LineVoltage", List.of("Ud, В", "Ud. В", "Ud\n(В)", "Напряжение на накопителе, B", "Напряжение сети (Ud)", "LineVoltage"));
-        put("ActivePower", List.of("акт.P,кВт", "акт.P.кВт", "Pакт.\n(кВт)", "Активная мощность, КВт", "Рпэд, кВт", "Активная мощность", "ActivePower"));
-        put("TotalPower", List.of("P, кВА", "P. кВА", "Мощность, кВт", "Мощность ПЭД, кВт", "Pполн.\n(кВА)", "Sпэд, кВА", "TotalPower"));
-        put("PowerFactor", List.of("cos", "COSf ", "CosF", "COS", "Cos Ф", "Cos ф", "Коэффициент мощности", "PowerFactor"));
-        put("EngineLoad", List.of("Загр., %", "Загр.. %", "Загрузка ПЭД, %", "Загрузка , %", "Загрузка\n(%)", "Загр.ПЭД, %", "Загр. ПЭД, %", "EngineLoad"));
-        put("InputVoltageAB", List.of("Uab, В", "Uвх.AB.В", "Uвх.AB,В", "Uвх.AB, В", "Напряжение AB, B", "Напряжение фазы А, В", "Uab\n(В)", "Напряжение между фазами AB", "InputVoltageAB"));
-        put("InputVoltageBC", List.of("Ubc, В", "Uвх.BC.В", "Uвх.BC,В", "Uвх.BC, В", "Напряжение ВС, B", "Напряжение фазы B, В", "Ubc\n(В)", "Напряжение между фазами BC", "InputVoltageBC"));
-        put("InputVoltageCA", List.of("Uca, В", "Uвх.CA.В", "Uвх.CA,В", "Uвх.CA, В", "Напряжение СA, B", "Напряжение фазы C, В", "Uca\n(В)", "Напряжение между фазами CA", "InputVoltageCA"));
-        put("IntakePressure", List.of("P, ат.", "P. ат.", "Давление , Атм", "Давление жидкости на приеме насоса, атм", "Давление жидкости на приеме насоса , ат", "Р приема\n(ат.)", "Pвх.эцн, кгс/см2", "Давление на приеме насоса", "IntakePressure"));
-        put("EngineTemp", List.of("Tдвиг, °C", "Tдвиг. °C", "Температура двигателя , °С", "Температура ПЭД, °C", "T° масла ПЭД\n(°C)", "Температура масла ПЭД, °C", "T масла ПЭД, °C", "Температура двигателя", "EngineTemp"));
-        put("LiquidTemp", List.of("Tжид, °C", "Tжид. °C", "T° жидкости\n(°C)", "Тжидк.БВ", "Температура жидкости на приеме насоса , °C", "T окр, °C", "Температура жидкости", "LiquidTemp"));
-        put("VibrationAccRadial", List.of("Вибр X/Y, м/с2", "Вибр X/Y. м/с2", "Среднеквадратичная вибрация по осям X и Y, g", "Вибрация XY", "Вибрация, g", "Вибр.XY, g", "Вибрация вала насоса по оси X", "VibrationAccRadial"));
-        put("VibrationAccAxial", List.of("Вибр Z, м/с2", "Вибр Z. м/с2", "Вибрация по оси Z, g", "Вибрация Z", "Вибр. Z, g", "Вибр.Z, g", "Вибрация вала насоса по оси Y", "VibrationAccAxial"));
-        put("LiquidflowRatio", List.of("LiquidflowRatio"));
-        put("IsolationResistance", List.of("R, кОм", "Сопротивление изоляции, кОм", "Rиз, кОм", "R. кОм", "IsolationResistance"));
+        put(Columns.getWellID(), List.of("Куст_Скв._М-е", "№ Скважины", "Well", "WellID", "wellID"));
+        put(Columns.getRotationDirection(), List.of("Напр.вращен", "Направление вращения", "Направление вращения\nРежим работы", "Напр. вращ.", "Напр. вращения", "RotationDirection"));
+        put(Columns.getDate(), List.of("Дата, Время", "Время", "Дата и время\nконтроллера", "Date"));
+        put(Columns.getFrequency(), List.of("F, Гц", "F. Гц", "Частота вращения , Гц", "Частота вращения ПЭД (Гц), Гц", "F\n(Гц)", "Fвых, Гц", "Рабочая частота", "Fтек, Гц", "Frequency"));
+        put(Columns.getCurPhaseA(), List.of("Ia, A", "Ia. A", "Ia\n(А)", "Ток фазы U, A", "Ia ПЭД, А", "Ток фазы A", "CurPhaseA"));
+        put(Columns.getCurPhaseB(), List.of("Ib, A", "Ib. A", "Ib\n(А)", "Ток фазы V, A", "Ib ПЭД, А", "Ток фазы B", "CurPhaseB"));
+        put(Columns.getCurPhaseC(), List.of("Ic, A", "Ic. A", "Ic\n(А)", "Ток фазы W, A", "Ic ПЭД, А", "Ток фазы C", "CurPhaseC"));
+        put(Columns.getCurrentImbalance(), List.of("Дисбаланс по току , %", "Дисбаланс тока, %", "Дисб. I, %", "Дисб.I", "Дисб.I\n(%)", "Дисб.I ПЭД, %", "Дисбаланс токов", "CurrentImbalance"));
+        put(Columns.getLineCurrent(), List.of("Id, A", "Id. A", "Id\n(А)", "Ток на накопителе, A", "Ток(Id)", "LineCurrent"));
+        put(Columns.getLineVoltage(), List.of("Ud, В", "Ud. В", "Ud\n(В)", "Напряжение на накопителе, B", "Напряжение сети (Ud)", "LineVoltage"));
+        put(Columns.getActivePower(), List.of("акт.P,кВт", "акт.P.кВт", "Pакт.\n(кВт)", "Активная мощность, КВт", "Рпэд, кВт", "Активная мощность", "ActivePower"));
+        put(Columns.getTotalPower(), List.of("P, кВА", "P. кВА", "Мощность, кВт", "Мощность ПЭД, кВт", "Pполн.\n(кВА)", "Sпэд, кВА", "TotalPower"));
+        put(Columns.getPowerFactor(), List.of("cos", "COSf ", "CosF", "COS", "Cos Ф", "Cos ф", "Коэффициент мощности", "PowerFactor"));
+        put(Columns.getEngineLoad(), List.of("Загр., %", "Загр.. %", "Загрузка ПЭД, %", "Загрузка , %", "Загрузка\n(%)", "Загр.ПЭД, %", "Загр. ПЭД, %", "EngineLoad"));
+        put(Columns.getInputVoltageAB(), List.of("Uab, В", "Uвх.AB.В", "Uвх.AB,В", "Uвх.AB, В", "Напряжение AB, B", "Напряжение фазы А, В", "Uab\n(В)", "Напряжение между фазами AB", "InputVoltageAB"));
+        put(Columns.getInputVoltageBC(), List.of("Ubc, В", "Uвх.BC.В", "Uвх.BC,В", "Uвх.BC, В", "Напряжение ВС, B", "Напряжение фазы B, В", "Ubc\n(В)", "Напряжение между фазами BC", "InputVoltageBC"));
+        put(Columns.getInputVoltageCA(), List.of("Uca, В", "Uвх.CA.В", "Uвх.CA,В", "Uвх.CA, В", "Напряжение СA, B", "Напряжение фазы C, В", "Uca\n(В)", "Напряжение между фазами CA", "InputVoltageCA"));
+        put(Columns.getIntakePressure(), List.of("P, ат.", "P. ат.", "Давление , Атм", "Давление жидкости на приеме насоса, атм", "Давление жидкости на приеме насоса , ат", "Р приема\n(ат.)", "Pвх.эцн, кгс/см2", "Давление на приеме насоса", "IntakePressure"));
+        put(Columns.getEngineTemp(), List.of("Tдвиг, °C", "Tдвиг. °C", "Температура двигателя , °С", "Температура ПЭД, °C", "T° масла ПЭД\n(°C)", "Температура масла ПЭД, °C", "T масла ПЭД, °C", "Температура двигателя", "EngineTemp"));
+        put(Columns.getLiquidTemp(), List.of("Tжид, °C", "Tжид. °C", "T° жидкости\n(°C)", "Тжидк.БВ", "Температура жидкости на приеме насоса , °C", "T окр, °C", "Температура жидкости", "LiquidTemp"));
+        put(Columns.getVibrationAccRadial(), List.of("Вибр X/Y, м/с2", "Вибр X/Y. м/с2", "Среднеквадратичная вибрация по осям X и Y, g", "Вибрация XY", "Вибрация, g", "Вибр.XY, g", "Вибрация вала насоса по оси X", "VibrationAccRadial"));
+        put(Columns.getVibrationAccAxial(), List.of("Вибр Z, м/с2", "Вибр Z. м/с2", "Вибрация по оси Z, g", "Вибрация Z", "Вибр. Z, g", "Вибр.Z, g", "Вибрация вала насоса по оси Y", "VibrationAccAxial"));
+        put(Columns.getLiquidflowRatio(), List.of("LiquidflowRatio"));
+        put(Columns.getIsolationResistance(), List.of("R, кОм", "Сопротивление изоляции, кОм", "Rиз, кОм", "R. кОм", "IsolationResistance"));
     }};
 
     public static List<String> parseIndicatorsFile(List<String> strings, String sep, int nRows){
