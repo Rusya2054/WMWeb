@@ -33,7 +33,7 @@ public class DataManagerController {
     }
 
     @PostMapping("/pump-card/upload")
-    public String uploadFilesToDb(@RequestParam(value = "files[]", required = false) List<MultipartFile> files, Model model){
+    public String uploadIndicators(@RequestParam(value = "files[]", required = false) List<MultipartFile> files, Model model){
         Map<String, List<String>> uploadedIndicatorsFiles = new HashMap<>(files.size());
         Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(files.size());
         files.stream()
@@ -42,8 +42,7 @@ public class DataManagerController {
             try {
                 List<String> uploadedFile = IndicatorReader.readIndicatorsFile(f);
                 uploadedIndicatorsFiles.put(f.getOriginalFilename(), uploadedFile);
-                // TODO: парсинг 20 строк добавить перегрузку
-                uploadedParsedIndicatorsFiles.put(f.getOriginalFilename(), InputFileParser.parseIndicatorsFile(uploadedFile, "\t"));
+                uploadedParsedIndicatorsFiles.put(f.getOriginalFilename(), InputFileParser.parseIndicatorsFile(uploadedFile, "\t", 20));
             } catch (Exception e) {
                 e.getMessage();
             }
@@ -58,16 +57,18 @@ public class DataManagerController {
 
     @Data
     public static class RequestData {
-        // TODO: разорабться с передаемаемым типом (не String a Long)
         private String sessionID ;
         private String separator;
     }
 
     @PostMapping("/pump-card/upload/parse-indicators")
-    public String dynamicParseIndicatorsFile(@RequestBody  RequestData requestData, Model model) {
+    @ResponseBody
+    public Map<String, Object> dynamicParseIndicatorsFile(@RequestBody  RequestData requestData) {
         String separator = requestData.getSeparator();
         Long sessionID =Long.parseLong(requestData.getSessionID().replace(" ", ""));
-        System.out.println(separator +" " + sessionID);
+
+        Map<String, Object> response = new HashMap<>();
+        // TODO: логгирование по сессии если ошибки
         if (this.sessionMemory.keySet().contains(sessionID)){
             Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemory.get(sessionID);
             Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(uploadedIndicatorsFiles.size());
@@ -75,12 +76,24 @@ public class DataManagerController {
                     .entrySet()
                     .stream()
                     .forEach(e->{
-                        uploadedParsedIndicatorsFiles.put(e.getKey(), InputFileParser.parseIndicatorsFile(e.getValue(), separator));
+                        uploadedParsedIndicatorsFiles.put(e.getKey(), InputFileParser.parseIndicatorsFile(e.getValue(), separator, 20));
                     });
-            // TODO: парсинг 20 строк добавить перегрузку
-            model.addAttribute("sessionID", sessionID);
-            model.addAttribute("separator", separator);
-            model.addAttribute("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
+            // TODO: проверить если меньше 10 строк
+            response.put("sessionID", sessionID);
+            response.put("separator", separator);
+            response.put("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
+        }
+        return response;
+    }
+
+    @PostMapping("/pump-card/upload/indicators")
+    public String uploadFilesToDb(@RequestBody  RequestData requestData){
+            // TODO: удаление сессии из памяти
+
+        String separator = requestData.getSeparator();
+        Long sessionID =Long.parseLong(requestData.getSessionID().replace(" ", ""));
+        if (this.sessionMemory.keySet().contains(sessionID)){
+            System.out.println("123");
         }
         return "tabs";
     }

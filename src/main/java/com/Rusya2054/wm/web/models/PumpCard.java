@@ -20,9 +20,6 @@ public class PumpCard {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "field")
-    private String field;
-
     // нужно связать с wellId из indicators
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "well", referencedColumnName = "id")

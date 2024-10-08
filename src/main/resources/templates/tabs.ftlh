@@ -54,36 +54,29 @@
 
 
 
-        const data = {
+        const requestData = {
                 sessionID: sessionID,
                 separator: separator
             };
 
 
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/pump-card/upload/parse-indicators", true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                updateData();
-                // document.getElementById("response").innerHTML = xhr.responseText;
-            }
-        };
-        xhr.send(JSON.stringify(data));
+        fetch('/pump-card/upload/parse-indicators', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateData(data)
+        })
     }
 
-    function updateData(){
-        const separator = "${separator}";
-        var filesMap = {
-            <#list uploadedParsedIndicatorsFiles?keys as key>
-                "${key}": [
-                    <#list uploadedParsedIndicatorsFiles[key] as value>
-                        "${value}"<#if value_has_next>,</#if>
-                    </#list>
-                ]<#if key_has_next>,</#if>
-            </#list>
-        };
-        console.log(filesMap)
+    function updateData(data){
+        const separator = data["separator"];
+        var filesMap = data["uploadedParsedIndicatorsFiles"];
+
         var tabContents = document.querySelectorAll('.tab-content');
         tabContents.forEach(function(tabContent) {
             // Очищаем содержимое вкладки
@@ -97,25 +90,26 @@
             if (filesMap[key].length > 0){
                 const headerRow = filesMap[key][0].split(separator);
 
-                let tableHtml = '<table border="1"><thead><tr>';
+                let tableHtml = '<table border="1" style="width: 100%; border-collapse: collapse;">';
+                tableHtml += '<thead><tr>';
 
                 headerRow.forEach(function(header) {
-                    tableHtml += "<th>"+header+"</th>";
+                    tableHtml += "<th style='text-align: center; word-wrap: break-word;'>" + header + "</th>";
                 });
 
                 for (let i = 1; i < 10; i++) {
                     const rowData = filesMap[key][i].split(separator);
                     tableHtml += "<tr>";
                     rowData.forEach(function(column) {
-                        tableHtml += "<td>"+column+"</td>";
-                        console.log(column);
+                        tableHtml += "<td style='padding: 8px; text-align: center; word-wrap: break-word;'>" + column + "</td>";
+                        // console.log(column);
                     });
                     tableHtml += "</tr>";
                 }
                 tabContent.innerHTML = tableHtml;
             }else {
                 // Если данных нет, выводим сообщение
-                tabContent.innerHTML = "<p>Нет данных для отображения.</p>";
+                tabContent.innerHTML = "<p>"+"Нет данных для отображения."+"</p>";
             }
         }
     }
@@ -140,6 +134,29 @@
             event.currentTarget.classList.add("active");
         }
 
+    function wellNameBoxValidator(checkbox){
+        const option1 = document.querySelector('input[name="option"][value="option1"]');
+        const option2 = document.querySelector('input[name="option"][value="option2"]');
+
+        if (checkbox.value == "option1"){
+            if (checkbox.checked){
+                option1.checked = true;
+                option2.checked = false;
+            } else{
+                option1.checked = false;
+                option2.checked = true;
+            }
+
+        } else {
+            if (checkbox.checked){
+                option1.checked = false;
+                option2.checked = true;
+            } else{
+                option1.checked = true;
+                option2.checked = false;
+            }
+        }
+    }
 
 </script>
 
@@ -152,7 +169,7 @@
             <th scope="col">Разделительный знак</th>
             <th scope="col">Имя скважины</th>
             <td>
-                <input type="button" value="загрузить">
+                <input type="button" value="загрузить" href="/">
             </td>
         </tr>
         <tr>
@@ -167,10 +184,10 @@
             </td>
             <td>
                 <label>
-                    <input type="checkbox" name="option" value="option1" onclick="toggleCheckbox(this)"> По имени файла
+                    <input type="checkbox" name="option" value="option1" checked="true" onclick="wellNameBoxValidator(this)"> По имени файла
                 </label><br>
                 <label>
-                    <input type="checkbox" name="option" value="option2" onclick="toggleCheckbox(this)"> По столбцу файла
+                    <input type="checkbox" name="option" value="option2" onclick="wellNameBoxValidator(this)"> По столбцу файла
                 </label>
             </td>
             <td>
@@ -188,7 +205,7 @@
         <div id="tab_${key}" class="tab-content">
             <#if (uploadedParsedIndicatorsFiles[key]?size > 0)>
                 <#assign headerRow = uploadedParsedIndicatorsFiles[key][0]?split("${separator}") />
-                <table border="1">
+                <table border="1" style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr>
                             <#list headerRow as header>
@@ -202,7 +219,7 @@
                                 <tr>
                                     <#assign rowData = uploadedParsedIndicatorsFiles[key][i]?split("${separator}") />
                                     <#list rowData as column>
-                                        <td>${column}</td>
+                                        <td style='padding: 8px; text-align: center; word-wrap: break-word;'>${column}</td>
                                     </#list>
                                 </tr>
                             </#if>

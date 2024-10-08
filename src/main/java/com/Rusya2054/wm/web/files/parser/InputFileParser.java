@@ -34,6 +34,44 @@ public final class InputFileParser {
         put("IsolationResistance", List.of("R, кОм", "Сопротивление изоляции, кОм", "Rиз, кОм", "R. кОм", "IsolationResistance"));
     }};
 
+    public static List<String> parseIndicatorsFile(List<String> strings, String sep, int nRows){
+        if (!strings.isEmpty()) {
+            List<String> columnHeades = Arrays.stream(strings.get(0).split(sep)).toList();
+
+            // if columns finded, then index from columnHeades else -1
+            Map<String, Integer> columnIndexMap = new LinkedHashMap<>(30);
+            InputFileParser.parserMapTemplate.entrySet().forEach(p -> {
+                columnHeades.stream().forEach(c -> {
+                    if (p.getValue().contains(c)) {
+                        columnIndexMap.put(p.getKey(), columnHeades.indexOf(c));
+                    }
+                });
+                if (!columnIndexMap.keySet().contains(p.getKey())) {
+                    columnIndexMap.put(p.getKey(), -1);
+                }
+            });
+
+            List<String> result = new ArrayList<>(strings.size()){{add(String.join(sep, columnIndexMap.keySet()));}};
+
+            strings.stream()
+                    .skip(1)
+                    .limit(nRows)
+                    .filter(s -> s != null)
+                    .forEach(r->{
+                        String[] row = r.split(sep);
+                        result.add(String.join(sep, columnIndexMap
+                                .values()
+                                .stream()
+                                .map(v -> v.equals(-1) ? "0" : row[v])
+                                .toArray(String[]::new)));
+            });
+
+            return result;
+        } else{
+            return new ArrayList<>();
+        }
+
+    }
 
     public static List<String> parseIndicatorsFile(List<String> strings, String sep){
         if (!strings.isEmpty()){

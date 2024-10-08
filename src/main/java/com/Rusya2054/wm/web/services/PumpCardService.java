@@ -13,13 +13,13 @@ import java.util.List;
 @Slf4j
 public class PumpCardService {
     private final PumpCardRepository pumpCardRepository;
-
-    public List<PumpCard> listPumpCards(String field){
-        if (field != null){
-            return pumpCardRepository.findByField(field);
-        }
-        return pumpCardRepository.findAll();
-    }
+        // TODO: поиск по скважине
+//    public List<PumpCard> listPumpCards(String field){
+//        if (field != null){
+//            return pumpCardRepository.findByField(field);
+//        }
+//        return pumpCardRepository.findAll();
+//    }
 
     private void savePumpCard(PumpCard pumpCard){
         log.info("Saving new {}", pumpCard);

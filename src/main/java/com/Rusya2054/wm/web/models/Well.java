@@ -20,4 +20,7 @@ public class Well {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "field")
+    private String field;
 }

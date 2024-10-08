@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface PumpCardRepository extends JpaRepository<PumpCard, Long> {
     // TODO: тут реализовать
-    List<PumpCard> findByField(String field);
+    // List<PumpCard> findByField(String field);
 }
