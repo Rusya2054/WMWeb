@@ -196,7 +196,6 @@
                 <select name="data-splitter" id="data-splitter" onchange="updateSep()">
                     <option value="\t" selected>Табуляция</option>
                     <option value=" ">Пробел</option>
-                    <option value=".">Точка</option>
                     <option value=",">Запятая</option>
                     <option value=";">Точка с запятой</option>
                 </select>

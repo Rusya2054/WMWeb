@@ -1,9 +1,14 @@
 package com.Rusya2054.wm.web.controllers;
 
+import com.Rusya2054.wm.web.files.IndicatorInputDataValidator;
 import com.Rusya2054.wm.web.files.parser.InputFileParser;
 import com.Rusya2054.wm.web.files.reader.IndicatorReader;
+import com.Rusya2054.wm.web.models.Indicator;
+import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.repositories.IndicatorRepository;
 import com.Rusya2054.wm.web.repositories.PumpCardRepository;
+import com.Rusya2054.wm.web.repositories.WellRepository;
+import com.Rusya2054.wm.web.services.IndicatorService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -21,11 +26,13 @@ import static com.Rusya2054.wm.web.files.parser.InputFileParser.parseIndicatorsF
 public class DataManagerController {
     private final IndicatorRepository indicatorRepository;
     private final PumpCardRepository pumpCardRepository;
+    private final WellRepository wellRepository;
+    private final IndicatorService indicatorService;
 
     private final Map<Long, Map<String, List<String>>> sessionMemory;
 
     @GetMapping("/pump-card")
-    public String getDataManager( Model model){
+    public String getDataManager(Model model){
         // передача списка всех товаров
 //        model.addAttribute("wells", indicatorRepository.findDistinctWells());
 
@@ -94,9 +101,20 @@ public class DataManagerController {
 
     @PostMapping("/pump-card/upload/indicators")
     public String uploadFilesToDb(@RequestBody  RequestData requestData){
-            // TODO: удаление сессии из памяти
+        class SeparatorValidator{
 
-        String separator = requestData.getSeparator();
+            public static String validate(String sep){
+                if (sep.equals("\\t")){
+                    return "\t";
+                }
+                if (sep.equals(".")){
+                    return "\\.";
+                }
+                return sep;
+            }
+        }
+
+        String separator = SeparatorValidator.validate(requestData.getSeparator());
         Boolean byFileName = requestData.getByFileName();
 //        Boolean.valueOf()
         Long sessionID =Long.parseLong(requestData.getSessionID().replace(" ", ""));
@@ -104,11 +122,43 @@ public class DataManagerController {
 //            InputFileParser.p
             Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemory.get(sessionID);
             uploadedIndicatorsFiles.entrySet().forEach(e->{
-                // TODO: парсим переводим в стандартный вид класса Indicator[]
-                List<String> uploadedIndicatorsFile =  e.getValue();
+                final Well well = new Well();
+                if (byFileName) {
+                    well.setName(e.getKey().split("\\.")[0]);
+                }
+                List<String> uploadedParsedIndicatorsFile =  InputFileParser.parseIndicatorsFile(e.getValue(), separator);
+                List<Indicator> indicators = new ArrayList<>(uploadedParsedIndicatorsFile.size());
+                uploadedParsedIndicatorsFile
+                        .stream()
+                        .skip(1)
+                        .forEach(string -> {
+                            String[] splittedData = string.split(separator);
+                            Indicator indicator = IndicatorInputDataValidator.validate(splittedData);
+                            if (well.getName() == null && !byFileName){
+                                well.setName(splittedData[0]);
+                            }
+                            indicators.add(indicator);
+                });
+                Well dbWell = wellRepository.findByName(well.getName());
+                if(dbWell == null){
+                    wellRepository.save(well);
+                    dbWell = well;
+                }
+                Well finalDbWell = dbWell;
+                indicators.forEach(indicator -> indicator.setWell(finalDbWell));
+                for (Indicator i : indicators){
+                    try {
+                        // TODO: сделать провеку по датам и добавлять
+                        indicatorService.saveWithNewTransaction(i);
+                    } catch (Exception ignore){
+
+                    }
+                }
             });
+            sessionMemory.remove(sessionID);
         }
-        return "data-manager";
+        // TODO: разобраться с перенаправлением на др страницу
+        return "redirect:/pump-card";
     }
 
 }

@@ -15,4 +15,7 @@ public interface IndicatorRepository extends JpaRepository<Indicator, Long> {
 
     @Query("SELECT DISTINCT i.well FROM Indicator i")
     List<Well> findDistinctWells();
+
+
+
 }

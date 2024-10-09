@@ -13,11 +13,10 @@ public final class IndicatorReader {
         InputStream is = f.getInputStream();
         Reader r = new InputStreamReader(is);
         BufferedReader br = new BufferedReader(r);
-        String line = br.readLine();
-        strings.add(line);
+        String line = "";
         while (line != null){
             line = br.readLine();
-            strings.add(br.readLine());
+            strings.add(line);
         }
         return strings;
     }

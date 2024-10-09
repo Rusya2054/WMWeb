@@ -31,6 +31,9 @@ public class Indicator {
     @Column(name = "dateTime")
     private LocalDateTime dateTime;
 
+    @Column(name = "frequency")
+    private Float frequency;
+
     @Column(name = "intakePressure")
     private Float intakePressure;
 
