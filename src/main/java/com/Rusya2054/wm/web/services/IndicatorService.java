@@ -15,7 +15,12 @@ public class IndicatorService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveWithNewTransaction(Indicator indicator) {
-        indicatorRepository.save(indicator);
+        try {
+            indicatorRepository.save(indicator);
+        } catch (Exception ignore){
+
+        }
+
     }
 
 }

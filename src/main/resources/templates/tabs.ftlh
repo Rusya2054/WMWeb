@@ -67,7 +67,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            updateData(data)
+            updateData(data);
         })
     }
 
@@ -174,7 +174,11 @@
             },
             body: JSON.stringify(requestData)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.redirected){
+                window.location.href = response.url;
+            }
+        })
     }
 
 </script>
@@ -188,7 +192,7 @@
             <th scope="col">Разделительный знак</th>
             <th scope="col">Имя скважины</th>
             <td>
-                <input type="button" value="загрузить" onclick=uploadToDb()>
+                <input type="button" value="Загрузить" onclick=uploadToDb()>
             </td>
         </tr>
         <tr>

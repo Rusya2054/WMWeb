@@ -5,11 +5,30 @@
         <meta charset="UTF-8">
         <title>Менеджер данных</title>
     </head>
+    <script>
+        function wellNameHandler(text){
+            const requestData = {
+                input:text.value
+            };
+            fetch("/input-well-handler", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+        }
+
+
+
+
+    </script>
     <body>
         <h1>Менеджер данных</h1><hr>
         <form action="/pump-card/create" method="post">
             Название месторождения<input type="text" name="field"/></br>
-            Название месторождения<input type="text" name="well"/></br>
+            Название скважины<input type="text" name="well" list="well-list" oninput="wellNameHandler(this)"/></br>
+                <datalist id="well-list"></datalist>
             Типоразмер<input type="text" name="typeSize"/></br>
             Глубина спуска насоса<input type="text" name="pumpDepth"/></br>
             Последняя дата отказа<input type="text" name="lastFailureDate"/></br>

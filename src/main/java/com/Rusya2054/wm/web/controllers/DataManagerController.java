@@ -147,18 +147,24 @@ public class DataManagerController {
                 Well finalDbWell = dbWell;
                 indicators.forEach(indicator -> indicator.setWell(finalDbWell));
                 for (Indicator i : indicators){
-                    try {
-                        // TODO: сделать провеку по датам и добавлять
-                        indicatorService.saveWithNewTransaction(i);
-                    } catch (Exception ignore){
-
-                    }
+                    indicatorService.saveWithNewTransaction(i);
                 }
             });
             sessionMemory.remove(sessionID);
         }
-        // TODO: разобраться с перенаправлением на др страницу
         return "redirect:/pump-card";
+    }
+
+    @Data
+    public static class RequestWell {
+        private String input ;
+    }
+
+    @PostMapping("input-well-handler")
+    public String wellInputHandler(@RequestBody RequestWell requestWell){
+        // TODO: создать и переписать через wellService
+        System.out.println(requestWell.getInput());
+        return "";
     }
 
 }
