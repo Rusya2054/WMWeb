@@ -11,10 +11,11 @@ import java.util.List;
 
 @Repository
 public interface IndicatorRepository extends JpaRepository<Indicator, Long> {
-    List<Indicator> findByWellId(Well well);
+    List<Indicator> findByWell(Well well);
 
     @Query("SELECT DISTINCT i.well FROM Indicator i")
     List<Well> findDistinctWells();
+
 
 
 

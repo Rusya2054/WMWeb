@@ -5,10 +5,9 @@ import com.Rusya2054.wm.web.files.parser.InputFileParser;
 import com.Rusya2054.wm.web.files.reader.IndicatorReader;
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.Well;
-import com.Rusya2054.wm.web.repositories.IndicatorRepository;
 import com.Rusya2054.wm.web.repositories.PumpCardRepository;
-import com.Rusya2054.wm.web.repositories.WellRepository;
 import com.Rusya2054.wm.web.services.IndicatorService;
+import com.Rusya2054.wm.web.services.WellService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -24,9 +23,7 @@ import static com.Rusya2054.wm.web.files.parser.InputFileParser.parseIndicatorsF
 @Controller
 @RequiredArgsConstructor
 public class DataManagerController {
-    private final IndicatorRepository indicatorRepository;
-    private final PumpCardRepository pumpCardRepository;
-    private final WellRepository wellRepository;
+    private final WellService wellService;
     private final IndicatorService indicatorService;
 
     private final Map<Long, Map<String, List<String>>> sessionMemory;
@@ -116,10 +113,8 @@ public class DataManagerController {
 
         String separator = SeparatorValidator.validate(requestData.getSeparator());
         Boolean byFileName = requestData.getByFileName();
-//        Boolean.valueOf()
         Long sessionID =Long.parseLong(requestData.getSessionID().replace(" ", ""));
         if (this.sessionMemory.keySet().contains(sessionID)){
-//            InputFileParser.p
             Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemory.get(sessionID);
             uploadedIndicatorsFiles.entrySet().forEach(e->{
                 final Well well = new Well();
@@ -127,7 +122,8 @@ public class DataManagerController {
                     well.setName(e.getKey().split("\\.")[0]);
                 }
                 List<String> uploadedParsedIndicatorsFile =  InputFileParser.parseIndicatorsFile(e.getValue(), separator);
-                List<Indicator> indicators = new ArrayList<>(uploadedParsedIndicatorsFile.size());
+                Set<Indicator> indicators = new TreeSet<>(Comparator.comparing(Indicator::getDateTime));
+
                 uploadedParsedIndicatorsFile
                         .stream()
                         .skip(1)
@@ -139,16 +135,14 @@ public class DataManagerController {
                             }
                             indicators.add(indicator);
                 });
-                Well dbWell = wellRepository.findByName(well.getName());
-                if(dbWell == null){
-                    wellRepository.save(well);
-                    dbWell = well;
-                }
-                Well finalDbWell = dbWell;
+
+                Well finalDbWell = wellService.wellSave(well);
                 indicators.forEach(indicator -> indicator.setWell(finalDbWell));
-                for (Indicator i : indicators){
-                    indicatorService.saveWithNewTransaction(i);
-                }
+
+                indicatorService.saveIndicators(indicators, finalDbWell);
+//                for (Indicator i : indicators){
+//                    indicatorService.saveWithNewTransaction(i);
+//                }
             });
             sessionMemory.remove(sessionID);
         }
@@ -160,11 +154,16 @@ public class DataManagerController {
         private String input ;
     }
 
-    @PostMapping("input-well-handler")
-    public String wellInputHandler(@RequestBody RequestWell requestWell){
-        // TODO: создать и переписать через wellService
-        System.out.println(requestWell.getInput());
-        return "";
+    @ResponseBody
+    @PostMapping("/input-well-handler")
+    public Map<String, List<String>> wellInputHandler(@RequestBody RequestWell requestWell){
+        System.out.println("Text: " + wellService.getWells(requestWell.getInput()));
+        List<String> resultList = wellService.getWells(requestWell.getInput())
+                .stream()
+                .map(Well::getName)
+                .distinct()
+                .toList();
+        return new HashMap<>() {{put("wellList", resultList);}};
     }
 
 }
