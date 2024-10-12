@@ -48,7 +48,6 @@ public class WellController {
         PumpCard pumpCard = pumpCardService.getPumpCardByWell(well);
         InputPumpCardValidator.validate(pumpCard, field, typeSize, pumpDepth, lastFailureDate);
         pumpCardService.savePumpCard(pumpCard);
-        // TODO: если ошибка то возвращение ошибки
         model.addAttribute("wellList", wellService.getWellList());
         return "data-manager";
     }

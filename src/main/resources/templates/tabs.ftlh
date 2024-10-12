@@ -7,47 +7,95 @@
 </head>
 <style>
     body {
-        font-family: Arial, sans-serif; /* Шрифт для всего тела */
+        font-family: Arial, sans-serif; /* Шрифт */
+        background-color: #f0f8ff; /* Цвет фона */
         margin: 0; /* Убираем отступы */
-        padding: 0; /* Убираем внутренние отступы */
+        padding: 20px; /* Отступы внутри */
+    }
+
+    h2 {
+        color: #007bff; /* Цвет заголовка */
+        margin-bottom: 20px; /* Отступ снизу */
+    }
+    #tabTables {
+        width: 100%; /* Ширина таблицы 100% */
+        max-width: 800px; /* Максимальная ширина */
+        border-collapse: collapse; /* Убираем двойные границы */
+        margin: 0 auto; /* Центрируем таблицу */
+        font-size: 9px; /* Уменьшаем размер шрифта до 9 */
+    }
+
+    #tabTables th,
+    #tabTables td {
+        padding: 8px; /* Отступы в ячейках */
+        border: 1px solid #ccc; /* Цвет границы ячеек */
+        text-align: center; /* Центрируем текст в ячейках */
+    }
+
+    #tabTables th {
+        width: 80px; /* Установите ширину заголовков */
+        white-space: normal; /* Позволить переносить текст */
+        overflow: visible; /* Сделать переполнение видимым */
+        text-overflow: clip; /* Убрать многоточие для переполнения */
+        background-color: #007bff; /* Цвет фона заголовка */
+        color: white; /* Цвет текста заголовка */
+        word-wrap: break-word; /* Перенос слов в заголовках */
+    }
+
+    #tabTables td {
+        word-wrap: break-word; /* Перенос слов в ячейках */
+        max-width: 100px; /* Максимальная ширина ячеек */
+    }
+
+    #configTable {
+        width: 100%; /* Ширина таблицы */
+        border-collapse: collapse; /* Убираем пробелы между ячейками */
+        margin-bottom: 20px; /* Отступ снизу */
+    }
+
+    #configTable th, #configTable td {
+        border: 1px solid #007bff; /* Цвет границ */
+        text-align: center; /* Выравнивание по центру */
+    }
+
+    #configTable th {
+        background-color: #007bff; /* Цвет фона заголовка */
+        color: white; /* Цвет текста заголовка */
     }
 
     .tab-container {
-        display: flex; /* Используем flexbox для горизонтального выравнивания */
-        border-bottom: 1px solid #ccc; /* Разделительная линия между вкладками и содержимым */
-        overflow-x: auto; /* Позволяет прокручивать вкладки, если они не помещаются в окно */
+        display: flex; /* Отображение в строку */
+        margin-bottom: 10px; /* Отступ снизу */
     }
 
     .tab {
-        padding: 10px 20px; /* Отступы для вкладок */
-        cursor: pointer; /* Указатель при наведении */
-        border: 1px solid transparent; /* Скрываем границу по умолчанию */
-        border-bottom: none; /* Убираем нижнюю границу для вкладок */
-        background-color: #f1f1f1; /* Цвет фона вкладок */
+        padding: 10px 20px; /* Отступы внутри вкладки */
+        cursor: pointer; /* Курсор при наведении */
+        background-color: #e0e0e0; /* Цвет фона вкладки */
         margin-right: 5px; /* Отступ между вкладками */
-        white-space: nowrap; /* Не переносить текст на новую строку */
+        border-radius: 5px; /* Скругление углов */
     }
 
     .tab:hover {
-        background-color: #ddd; /* Цвет фона при наведении */
-    }
-
-    .active {
-        font-weight: bold; /* Выделение активной вкладки */
-        background-color: white; /* Цвет фона активной вкладки */
-        border: 1px solid #ccc; /* Граница для активной вкладки */
-        border-bottom: none; /* Убираем нижнюю границу для активной вкладки */
+        background-color: #c0c0c0; /* Цвет фона при наведении */
     }
 
     .tab-content {
-        display: none; /* Скрываем содержимое всех вкладок по умолчанию */
-        padding: 15px; /* Отступ для содержимого */
-        border: 1px solid #ccc; /* Граница содержимого */
+        display: none; /* Скрываем содержимое вкладок по умолчанию */
+        margin-top: 10px; /* Отступ сверху для контента */
     }
-</style>
 
+    .tab.active {
+        background-color: #007bff; /* Цвет фона для активной вкладки */
+        color: white; /* Цвет текста для активной вкладки (по желанию) */
+    }
+
+    .tab-content.active {
+        display: block; /* Показываем активный контент */
+    }
+
+</style>
 <script>
-    // Функция для обновления данных при изменении разделителя
     function updateSep() {
         const separator = document.getElementById('data-splitter').value;
         const sessionID = "${sessionID}";
@@ -185,9 +233,8 @@
 
 
 <body>
-    ${sessionID}
     <h2>Менеджер данных</h2>
-    <table>
+    <table id="configTable">
         <tr>
             <th scope="col">Разделительный знак</th>
             <th scope="col">Имя скважины</th>
@@ -227,7 +274,7 @@
         <div id="tab_${key}" class="tab-content">
             <#if (uploadedParsedIndicatorsFiles[key]?size > 0)>
                 <#assign headerRow = uploadedParsedIndicatorsFiles[key][0]?split("${separator}") />
-                <table border="1" style="width: 100%; border-collapse: collapse;">
+                <table border="1" id="tabTables">
                     <thead>
                         <tr>
                             <#list headerRow as header>

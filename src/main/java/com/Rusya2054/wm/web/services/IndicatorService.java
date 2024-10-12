@@ -37,4 +37,14 @@ public class IndicatorService {
         }
     }
 
+    public Map<String, LocalDateTime> getIndicatorDateTimeIntervals(Well well){
+        LocalDateTime minDateTime = indicatorRepository.findMinDate(well.getId());
+        LocalDateTime maxDateTime = indicatorRepository.findMaxDate(well.getId());
+        Map<String, LocalDateTime> map = new HashMap<>(2);
+        // TODO: если будут ошибки то валидацию
+        map.put("min", minDateTime);
+        map.put("max", maxDateTime);
+        return map;
+    }
+
 }

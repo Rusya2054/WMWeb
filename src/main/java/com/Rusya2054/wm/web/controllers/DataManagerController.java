@@ -9,6 +9,7 @@ import com.Rusya2054.wm.web.services.IndicatorService;
 import com.Rusya2054.wm.web.services.WellService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,8 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
-import static com.Rusya2054.wm.web.files.parser.InputFileParser.parseIndicatorsFile;
-
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class DataManagerController {
@@ -43,7 +43,6 @@ public class DataManagerController {
             try {
                 List<String> uploadedFile = IndicatorReader.readIndicatorsFile(f);
                 if (uploadedFile.size() > 20){
-                    // TODO: добавить оповещение или логгирование
                     uploadedIndicatorsFiles.put(f.getOriginalFilename(), uploadedFile);
                     uploadedParsedIndicatorsFiles.put(f.getOriginalFilename(), InputFileParser.parseIndicatorsFile(uploadedFile, "\t", 20));
                 }
@@ -75,9 +74,7 @@ public class DataManagerController {
     public Map<String, Object> dynamicParseIndicatorsFile(@RequestBody  RequestData requestData) {
         String separator = requestData.getSeparator();
         Long sessionID =Long.parseLong(requestData.getSessionID().replace(" ", ""));
-
         Map<String, Object> response = new HashMap<>();
-        // TODO: логгирование по сессии если ошибки
         if (this.sessionMemory.keySet().contains(sessionID)){
             Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemory.get(sessionID);
             Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(uploadedIndicatorsFiles.size());
@@ -90,6 +87,8 @@ public class DataManagerController {
             response.put("sessionID", sessionID);
             response.put("separator", separator);
             response.put("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
+        } else {
+            log.info("sessionID not founded");
         }
         return response;
     }
@@ -146,23 +145,4 @@ public class DataManagerController {
         }
         return "redirect:/pump-card";
     }
-
-    @Data
-    public static class RequestWell {
-        private String input ;
-    }
-
-    @ResponseBody
-    @PostMapping("/input-well-handler")
-    public Map<String, List<String>> wellInputHandler(@RequestBody RequestWell requestWell){
-        // TODO: тут коряво работает
-        System.out.println("Text: " + wellService.getWells(requestWell.getInput()));
-        List<String> resultList = wellService.getWells(requestWell.getInput())
-                .stream()
-                .map(Well::getName)
-                .distinct()
-                .toList();
-        return new HashMap<>() {{put("wellList", resultList);}};
-    }
-
 }

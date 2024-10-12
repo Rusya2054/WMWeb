@@ -74,6 +74,22 @@
         button:hover {
             background-color: #0056b3; /* Цвет кнопки при наведении */
         }
+
+        #exportBtn {
+            background-color: #007bff; /* Цвет кнопки */
+            color: white; /* Цвет текста кнопки */
+            border: none; /* Убираем границы */
+            padding: 10px 20px; /* Отступы внутри кнопки */
+            border-radius: 5px; /* Скругленные углы кнопки */
+            cursor: pointer; /* Указатель при наведении */
+            margin: 10px; /* Отступы между кнопками */
+            font-size: 16px; /* Размер шрифта */
+        }
+
+        #exportBtn:hover {
+            background-color: #0056b3; /* Цвет кнопки при наведении */
+        }
+
     </style>
     <script>
         function wellListInit() {
@@ -101,5 +117,7 @@
         <input type="file" name="files[]" multiple>
         <button type="submit">Загрузить файлы</button>
     </form>
+    <br>
+    <input type="button" id="exportBtn" value="Экспорт данных" onclick="window.location.href='/export'">
 </body>
 </html>

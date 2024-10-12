@@ -64,13 +64,13 @@
 <body>
     <form action="/well/${well.id}/update">
         ID скважины: ${well.id}</br>
+        Название скважины: ${well.name}</br></br>
+        <datalist id="well-list"></datalist>
         <#if well.field?has_content>
             Название месторождения: <input type="text" name="field" placeholder="${well.field}"/></br>
         <#else>
             <input type="text" name="field" placeholder="м-е отсутствует"/></br>
         </#if>
-        Название скважины: ${well.name}</br>
-        <datalist id="well-list"></datalist>
         Типоразмер:
         <#if pumpCard.typeSize?has_content>
             <input type="text" name="typeSize" placeholder="${pumpCard.typeSize}"/></br>

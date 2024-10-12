@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>BUYSELL</title>
+    <title>WMWeb</title>
     <style>
         body {
             display: flex;

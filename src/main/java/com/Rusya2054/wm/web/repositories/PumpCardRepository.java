@@ -10,6 +10,4 @@ import java.util.List;
 @Repository
 public interface PumpCardRepository extends JpaRepository<PumpCard, Long> {
     PumpCard findByWell(Well well);
-    // TODO: тут реализовать
-    // List<PumpCard> findByField(String field);
 }
