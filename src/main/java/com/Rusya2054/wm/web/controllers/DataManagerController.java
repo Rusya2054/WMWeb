@@ -5,7 +5,6 @@ import com.Rusya2054.wm.web.files.parser.InputFileParser;
 import com.Rusya2054.wm.web.files.reader.IndicatorReader;
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.Well;
-import com.Rusya2054.wm.web.repositories.PumpCardRepository;
 import com.Rusya2054.wm.web.services.IndicatorService;
 import com.Rusya2054.wm.web.services.WellService;
 import lombok.Data;
@@ -30,9 +29,7 @@ public class DataManagerController {
 
     @GetMapping("/pump-card")
     public String getDataManager(Model model){
-        // передача списка всех товаров
-//        model.addAttribute("wells", indicatorRepository.findDistinctWells());
-
+        model.addAttribute("wellList", wellService.getWellList());
         return "data-manager";
     }
 
@@ -62,6 +59,7 @@ public class DataManagerController {
             model.addAttribute("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
             return "tabs";
         }
+        model.addAttribute("wellList", wellService.getWellList());
         return "data-manager";
     }
 
@@ -157,6 +155,7 @@ public class DataManagerController {
     @ResponseBody
     @PostMapping("/input-well-handler")
     public Map<String, List<String>> wellInputHandler(@RequestBody RequestWell requestWell){
+        // TODO: тут коряво работает
         System.out.println("Text: " + wellService.getWells(requestWell.getInput()));
         List<String> resultList = wellService.getWells(requestWell.getInput())
                 .stream()

@@ -44,7 +44,6 @@ public final class IndicatorInputDataValidator {
         } catch (Exception ignore){
             return -1f;
         }
-
     }
 
     private static LocalDateTime parseDateTime(String s){

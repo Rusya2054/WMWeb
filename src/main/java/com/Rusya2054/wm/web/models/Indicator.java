@@ -22,7 +22,7 @@ public class Indicator {
     private Long id;
 
     @ManyToOne(cascade =  CascadeType.REFRESH, fetch = FetchType.EAGER)
-    @JoinColumn(name = "well", referencedColumnName = "id")
+    @JoinColumn(name = "well_id", referencedColumnName = "id")
     private Well well;
 
     @Column(name = "rotationDirection")

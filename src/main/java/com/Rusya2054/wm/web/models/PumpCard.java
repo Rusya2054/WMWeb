@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "pump_cards")
@@ -22,7 +23,7 @@ public class PumpCard {
 
     // нужно связать с wellId из indicators
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "well", referencedColumnName = "id")
+    @JoinColumn(name = "well_id", referencedColumnName = "id")
     private Well well;
 
     @Column(name = "typeSize")
@@ -33,4 +34,5 @@ public class PumpCard {
 
     @Column(name = "lastFailureDate")
     private LocalDate lastFailureDate;
+
 }

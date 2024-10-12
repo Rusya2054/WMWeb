@@ -1,6 +1,7 @@
 package com.Rusya2054.wm.web.services;
 
 import com.Rusya2054.wm.web.models.PumpCard;
+import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.repositories.PumpCardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,15 +14,8 @@ import java.util.List;
 @Slf4j
 public class PumpCardService {
     private final PumpCardRepository pumpCardRepository;
-        // TODO: поиск по скважине
-//    public List<PumpCard> listPumpCards(String field){
-//        if (field != null){
-//            return pumpCardRepository.findByField(field);
-//        }
-//        return pumpCardRepository.findAll();
-//    }
 
-    private void savePumpCard(PumpCard pumpCard){
+    public void savePumpCard(PumpCard pumpCard){
         log.info("Saving new {}", pumpCard);
         pumpCardRepository.save(pumpCard);
     }
@@ -29,8 +23,18 @@ public class PumpCardService {
         pumpCardRepository.deleteById(id);
     }
 
-     public PumpCard getPumpCardById(Long id) {
+    public PumpCard getPumpCardById(Long id) {
         // если не найден id то null
         return pumpCardRepository.findById(id).orElse(null);
+    }
+    public  PumpCard getPumpCardByWell(Well well){
+        PumpCard pumpCard = pumpCardRepository.findByWell(well);
+        if (pumpCard == null){
+            pumpCard = new PumpCard().builder().well(well).build();
+            pumpCardRepository.save(pumpCard);
+            return pumpCard;
+        } else {
+            return pumpCard;
+        }
     }
 }
