@@ -32,14 +32,7 @@ public class WellService {
         return well;
     }
 
-    public List<Well> getWells(){
-        return wellRepository.findAll();
-    }
     public List<Well> getWellList(){
         return wellRepository.findAll();
-    }
-
-    public List<Well> getWells(String s){
-        return wellRepository.findAll().stream().filter(well -> well.getName().startsWith(s)).toList();
     }
 }
