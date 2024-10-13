@@ -62,8 +62,8 @@
     </script>
 </head>
 <body>
-    <form action="/well/${well.id}/update">
-        ID скважины: ${well.id}</br>
+    <form action="/well/${well.id?c}/update">
+        ID скважины: ${well.id?c}</br>
         Название скважины: ${well.name}</br></br>
         <datalist id="well-list"></datalist>
         <#if well.field?has_content>

@@ -8,8 +8,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +35,20 @@ public class DataExportController {
         }).toList();
         model.addAttribute("wells", wellWrapperList);
          return "export";
+    }
+
+    @Data
+    public static class RequestExportData {
+        private Long ID ;
+        private String separator;
+        private Boolean byFileName;
+    }
+
+    @PostMapping("/export/files")
+    public String exportToFiles(@RequestBody RequestExportData requestExportData){
+
+
+        return "/pump-card";
     }
 
     @PostMapping("/export/filter")

@@ -92,11 +92,6 @@
 
     </style>
     <script>
-        function wellListInit() {
-            console.log("123");
-        }
-
-        window.onload = wellListInit; // Исправлено: убрано лишнее выполнение функции
     </script>
 </head>
 <body>
@@ -109,7 +104,7 @@
             <#else>
                 <b>м-е отсутствует</b>
             </#if>
-            | ${well.name} | <a href="/well/${well.id}">Подробнее</a>
+            | ${well.name} | <a href="/well/${well.id?c}">Подробнее</a>
         </p>
     </#list>
     <h1>Выберите файлы</h1>
