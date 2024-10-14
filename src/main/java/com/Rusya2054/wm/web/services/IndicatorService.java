@@ -38,10 +38,20 @@ public class IndicatorService {
     }
 
     public LocalDateTime getIndicatorMaxDate(Well well){
-        return indicatorRepository.findMaxDate(well.getId());
+        LocalDateTime maxDate = indicatorRepository.findMaxDate(well.getId());
+        if (maxDate == null){
+            return LocalDateTime.of(1970, 1, 1, 0, 0, 0);
+        } else {
+            return maxDate;
+        }
     }
 
     public LocalDateTime getIndicatorMinDate(Well well){
-        return indicatorRepository.findMinDate(well.getId());
+        LocalDateTime minDate = indicatorRepository.findMinDate(well.getId());
+        if (minDate == null){
+            return LocalDateTime.of(1970, 1, 1, 0, 0, 0);
+        } else {
+            return minDate;
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.Rusya2054.wm.web.files.reader.IndicatorReader;
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.services.IndicatorService;
+import com.Rusya2054.wm.web.services.SessionMemoryService;
 import com.Rusya2054.wm.web.services.WellService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
 
@@ -24,8 +26,8 @@ import java.util.*;
 public class DataManagerController {
     private final WellService wellService;
     private final IndicatorService indicatorService;
+    private final SessionMemoryService sessionMemoryService;
 
-    private final Map<Long, Map<String, List<String>>> sessionMemory;
 
     @GetMapping("/pump-card")
     public String getDataManager(Model model){
@@ -51,8 +53,7 @@ public class DataManagerController {
             }
         });
         if (!uploadedIndicatorsFiles.isEmpty()){
-            Long sessionID = (long)(Long.MAX_VALUE*Math.random());
-            sessionMemory.put(sessionID, uploadedIndicatorsFiles);
+            Long sessionID = sessionMemoryService.addToMemory(uploadedIndicatorsFiles);
             model.addAttribute("sessionID", sessionID);
             model.addAttribute("separator", "\t");
             model.addAttribute("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
@@ -64,7 +65,7 @@ public class DataManagerController {
 
     @Data
     public static class RequestData {
-        private String sessionID ;
+        private Long sessionID ;
         private String separator;
         private Boolean byFileName;
     }
@@ -73,10 +74,10 @@ public class DataManagerController {
     @ResponseBody
     public Map<String, Object> dynamicParseIndicatorsFile(@RequestBody  RequestData requestData) {
         String separator = requestData.getSeparator();
-        Long sessionID =Long.parseLong(requestData.getSessionID().replace(" ", ""));
+        Long sessionID =requestData.getSessionID();
         Map<String, Object> response = new HashMap<>();
-        if (this.sessionMemory.keySet().contains(sessionID)){
-            Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemory.get(sessionID);
+        if (this.sessionMemoryService.getSessionMemory().keySet().contains(sessionID)){
+            Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemoryService.getSessionMemory().get(sessionID);
             Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(uploadedIndicatorsFiles.size());
             uploadedIndicatorsFiles
                     .entrySet()
@@ -90,11 +91,12 @@ public class DataManagerController {
         } else {
             log.info("sessionID not founded");
         }
+        // TODO: тут стиль слетает при взаимодействии
         return response;
     }
 
     @PostMapping("/pump-card/upload/indicators")
-    public String uploadFilesToDb(@RequestBody  RequestData requestData){
+    public String uploadFilesToDb(@RequestBody  RequestData requestData, RedirectAttributes redirectAttributes){
         class SeparatorValidator{
 
             public static String validate(String sep){
@@ -110,9 +112,12 @@ public class DataManagerController {
 
         String separator = SeparatorValidator.validate(requestData.getSeparator());
         Boolean byFileName = requestData.getByFileName();
-        Long sessionID =Long.parseLong(requestData.getSessionID().replace(" ", ""));
-        if (this.sessionMemory.keySet().contains(sessionID)){
-            Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemory.get(sessionID);
+        Long sessionID = requestData.getSessionID();
+
+        List<List<Well>> duplicateWellList = new ArrayList<>(100);
+        // TODO: проверка если имена сквадин повторяются переход на новую страницу и удаление из sessionMemory, те скважины которые добавил. если длина равна нулю то удалять по ключу. и если есть коллизия то на новую страницу, чтобы выбрать в какой контейнер загружать
+        if (this.sessionMemoryService.getSessionMemory().keySet().contains(sessionID)){
+            Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemoryService.getSessionMemory().get(sessionID);
             uploadedIndicatorsFiles.entrySet().forEach(e->{
                 final Well well = new Well();
                 if (byFileName) {
@@ -133,16 +138,30 @@ public class DataManagerController {
                             indicators.add(indicator);
                 });
 
-                Well finalDbWell = wellService.wellSave(well);
-                indicators.forEach(indicator -> indicator.setWell(finalDbWell));
+                List<Well> dbWellList = wellService.getWellsByName(well);
+                if (!dbWellList.isEmpty()){
+                    duplicateWellList.add(dbWellList);
+                } else{
+                    Well finalDbWell = wellService.wellSave(well);
+                    indicators.forEach(indicator -> indicator.setWell(finalDbWell));
+                    indicatorService.saveIndicators(indicators, finalDbWell);
+                    this.sessionMemoryService.getSessionMemory().get(sessionID).remove(e.getKey());
+                }
 
-                indicatorService.saveIndicators(indicators, finalDbWell);
 //                for (Indicator i : indicators){
 //                    indicatorService.saveWithNewTransaction(i);
 //                }
             });
-            sessionMemory.remove(sessionID);
+
         }
-        return "redirect:/pump-card";
+        if (duplicateWellList.isEmpty()){
+            this.sessionMemoryService.getSessionMemory().remove(sessionID);
+            return "redirect:/pump-card";
+        } else {
+            redirectAttributes.addFlashAttribute("sessionID", sessionID);
+            redirectAttributes.addFlashAttribute("separator", separator);
+            redirectAttributes.addFlashAttribute("duplicateWellList", duplicateWellList);
+            return "redirect:/well-dublicates";
+        }
     }
 }

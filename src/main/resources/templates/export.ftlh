@@ -42,20 +42,30 @@
         if (filteredBlocks.length > 0){
             const requestData = {};
             filteredBlocks.forEach((element) => {
-                console.log(element.id);
                 const data = {};
                 data["minDate"] = element.querySelector('input[name="minDate"]').value;
                 data["maxDate"] = element.querySelector('input[name="maxDate"]').value;
-                console.log(data);
                 requestData[element.id] = data;
-            })
+            });
             fetch('/export/files', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            }).then(response => {
+                return response.text();
+            }).then(data => {
+                const blob = new Blob([data], { type: 'text/plain' }); // Создаем Blob из строки
+                const url = window.URL.createObjectURL(blob); // Создаем URL для Blob
+                const a = document.createElement('a'); // Создаем ссылку
+                a.href = url; // Присваиваем URL
+                a.download = 'exported_data.txt'; // Имя файла для сохранения
+                document.body.appendChild(a); // Добавляем ссылку в документ
+                a.click(); // Программно кликаем на ссылку
+                a.remove(); // Убираем ссылку после скачивания
+                window.URL.revokeObjectURL(url); // Освобождаем URL
+            });
         }
 
     }

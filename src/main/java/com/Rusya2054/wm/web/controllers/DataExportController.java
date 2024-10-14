@@ -6,6 +6,9 @@ import com.Rusya2054.wm.web.services.IndicatorService;
 import com.Rusya2054.wm.web.services.WellService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,16 +42,25 @@ public class DataExportController {
 
     @Data
     public static class RequestExportData {
-        private Long ID ;
-        private String separator;
-        private Boolean byFileName;
+        private String minDate;
+        private String maxDate;
     }
 
+
     @PostMapping("/export/files")
-    public String exportToFiles(@RequestBody RequestExportData requestExportData){
-
-
-        return "/pump-card";
+    public ResponseEntity<String> exportToFiles(@RequestBody Map<Long, RequestExportData> requestExportDataMap){
+        // TODO: заменить на Map<String, ResponseEntity<String>>
+        // TODO: разобраться с проблемой на "\n"
+        StringBuilder content = new StringBuilder();
+        requestExportDataMap.forEach((key, value) -> {
+            content.append(key).append("\n");
+            content.append("\t").append(value);
+            content.append("\n");
+        });
+        System.out.println(content.toString());
+        return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE) // Указываем тип контента
+        .body(content.toString());
     }
 
     @PostMapping("/export/filter")

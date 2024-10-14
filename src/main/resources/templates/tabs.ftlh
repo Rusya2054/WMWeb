@@ -98,7 +98,7 @@
 <script>
     function updateSep() {
         const separator = document.getElementById('data-splitter').value;
-        const sessionID = "${sessionID}";
+        const sessionID = "${sessionID?c}";
 
         const requestData = {
                 sessionID: sessionID,
@@ -205,7 +205,7 @@
     }
     function uploadToDb(){
         const separator = document.getElementById('data-splitter').value;
-        const sessionID = "${sessionID}";
+        const sessionID = "${sessionID?c}";
         const byFileName = document.querySelector('input[name="option"][value="option1"]').checked
 
         const requestData = {

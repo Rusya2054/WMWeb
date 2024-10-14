@@ -15,21 +15,20 @@ public class WellService {
     private final WellRepository wellRepository;
 
     public Well wellSave(Well well){
-        Well dbWell = wellRepository.findByName(well.getName());
-        if (dbWell == null){
+        List<Well> dbWellList = wellRepository.findByName(well.getName());
+        if (dbWellList.isEmpty()){
             wellRepository.save(well);
             log.info("Saving new {}", well);
-            dbWell = well;
-        }
-        return dbWell;
-    }
-
-    public Well getClienWell(Long id){
-        Well well = wellRepository.findById(id).orElse(null);
-        if (well.getField() == null){
-            well.setField("м-е отсутствует");
         }
         return well;
+    }
+
+    public List<Well> getWellsByName(Well well){
+       return wellRepository.findByName(well.getName());
+    }
+
+    public Well getWell(Long id){
+        return wellRepository.findById(id).orElse(null);
     }
 
     public List<Well> getWellList(){

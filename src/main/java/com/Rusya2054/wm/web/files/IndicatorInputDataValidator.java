@@ -47,6 +47,7 @@ public final class IndicatorInputDataValidator {
     }
 
     private static LocalDateTime parseDateTime(String s){
+        // TODO: проверить работоспособность
         DateTimeFormatter[] formats = {DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
                 DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"),
                 DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"),
