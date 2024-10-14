@@ -7,11 +7,23 @@
 <body>
     <h1>Выбор из соответствующих дубликатов скважин</h1>
     <hr>
-    ${sessionID?c}
+
     <#list duplicateWellList as wells>
-        <#list wells as well>
-            ${well}
-        </#list>
+        <form>
+            <#list wells as well>
+                <label>
+                    <input type="radio" name="option" value="1" > ${well.id} | ${well.name} |
+                        <#if well.field?has_content> <b>${well.field}</b>
+                            <#else>
+                            <b>м-е отсутствует</b>
+                        </#if><br>
+                </label>
+            </#list>
+            <label>
+                <input type="radio" name="option" value="0" checked="checked"> new id | new name | new field<br>
+            </label>
+        </form>
+        <br><br>
     </#list>
 </body>
 </html>
