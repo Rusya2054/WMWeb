@@ -28,7 +28,16 @@ public class WellService {
     }
 
     public Well getWell(Long id){
-        return wellRepository.findById(id).orElse(null);
+        return wellRepository.findById(id).orElse(new Well());
+    }
+
+    public Well getWell(Long id, String name){
+        Well well = wellRepository.findById(id).orElse(new Well());
+        if (well.getName() == null){
+            well.setName(name);
+            return wellRepository.save(well);
+        }
+        return well;
     }
 
     public List<Well> getWellList(){

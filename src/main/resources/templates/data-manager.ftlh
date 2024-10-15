@@ -98,7 +98,7 @@
     <h1>Менеджер данных</h1>
     <hr>
     <#list wellList as well>
-        <p>
+        <p>${well.id} |
             <#if well.field?has_content>
                 <b>${well.field}</b>
             <#else>

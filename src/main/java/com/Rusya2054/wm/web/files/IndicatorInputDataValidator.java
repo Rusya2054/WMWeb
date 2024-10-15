@@ -1,10 +1,11 @@
 package com.Rusya2054.wm.web.files;
 
 import com.Rusya2054.wm.web.models.Indicator;
+import com.Rusya2054.wm.web.models.Well;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.*;
 
 public final class IndicatorInputDataValidator {
 
@@ -62,6 +63,26 @@ public final class IndicatorInputDataValidator {
             }
         });
         return value[0];
+    }
+
+    public static Set<Indicator> formIndicator(List<String> uploadedParsedIndicatorsFile,
+                                               String separator,
+                                               Boolean byFileName,
+                                               Well well){
+        Set<Indicator> indicators = new TreeSet<>(Comparator.comparing(Indicator::getDateTime));
+
+        uploadedParsedIndicatorsFile
+                        .stream()
+                        .skip(1)
+                        .forEach(string -> {
+                            String[] splittedData = string.split(separator);
+                            Indicator indicator = IndicatorInputDataValidator.validate(splittedData);
+                            if (well.getName() == null && !byFileName){
+                                well.setName(splittedData[0]);
+                            }
+                            indicators.add(indicator);
+                });
+        return indicators;
     }
 
 }

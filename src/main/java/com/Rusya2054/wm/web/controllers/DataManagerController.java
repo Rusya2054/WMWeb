@@ -1,6 +1,7 @@
 package com.Rusya2054.wm.web.controllers;
 
 import com.Rusya2054.wm.web.files.IndicatorInputDataValidator;
+import com.Rusya2054.wm.web.files.SeparatorValidator;
 import com.Rusya2054.wm.web.files.parser.InputFileParser;
 import com.Rusya2054.wm.web.files.reader.IndicatorReader;
 import com.Rusya2054.wm.web.models.Indicator;
@@ -27,7 +28,6 @@ public class DataManagerController {
     private final WellService wellService;
     private final IndicatorService indicatorService;
     private final SessionMemoryService sessionMemoryService;
-
 
     @GetMapping("/pump-card")
     public String getDataManager(Model model){
@@ -97,70 +97,40 @@ public class DataManagerController {
 
     @PostMapping("/pump-card/upload/indicators")
     public String uploadFilesToDb(@RequestBody  RequestData requestData, RedirectAttributes redirectAttributes){
-        class SeparatorValidator{
-
-            public static String validate(String sep){
-                if (sep.equals("\\t")){
-                    return "\t";
-                }
-                if (sep.equals(".")){
-                    return "\\.";
-                }
-                return sep;
-            }
-        }
 
         String separator = SeparatorValidator.validate(requestData.getSeparator());
         Boolean byFileName = requestData.getByFileName();
         Long sessionID = requestData.getSessionID();
 
-        List<List<Well>> duplicateWellList = new ArrayList<>(100);
-        // TODO: проверка если имена сквадин повторяются переход на новую страницу и удаление из sessionMemory, те скважины которые добавил. если длина равна нулю то удалять по ключу. и если есть коллизия то на новую страницу, чтобы выбрать в какой контейнер загружать
-        if (this.sessionMemoryService.getSessionMemory().keySet().contains(sessionID)){
+        Map<String, List<Well>> duplicateWellMap = new HashMap<>(100);
+
+        if (this.sessionMemoryService.getSessionMemory().containsKey(sessionID)){
             Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemoryService.getSessionMemory().get(sessionID);
             uploadedIndicatorsFiles.entrySet().forEach(e->{
                 final Well well = new Well();
                 if (byFileName) {
                     well.setName(e.getKey().split("\\.")[0]);
                 }
-                List<String> uploadedParsedIndicatorsFile =  InputFileParser.parseIndicatorsFile(e.getValue(), separator);
-                Set<Indicator> indicators = new TreeSet<>(Comparator.comparing(Indicator::getDateTime));
-
-                uploadedParsedIndicatorsFile
-                        .stream()
-                        .skip(1)
-                        .forEach(string -> {
-                            String[] splittedData = string.split(separator);
-                            Indicator indicator = IndicatorInputDataValidator.validate(splittedData);
-                            if (well.getName() == null && !byFileName){
-                                well.setName(splittedData[0]);
-                            }
-                            indicators.add(indicator);
-                });
-
+                Set<Indicator> indicators = IndicatorInputDataValidator.formIndicator(InputFileParser.parseIndicatorsFile(e.getValue(), separator),
+                        separator, byFileName, well);
+                // TODO: проверить indicators на качество
                 List<Well> dbWellList = wellService.getWellsByName(well);
                 if (!dbWellList.isEmpty()){
-                    duplicateWellList.add(dbWellList);
+                    duplicateWellMap.put(e.getKey(), dbWellList);
                 } else{
                     Well finalDbWell = wellService.wellSave(well);
-                    indicators.forEach(indicator -> indicator.setWell(finalDbWell));
                     indicatorService.saveIndicators(indicators, finalDbWell);
                     this.sessionMemoryService.getSessionMemory().get(sessionID).remove(e.getKey());
                 }
-
-//                for (Indicator i : indicators){
-//                    indicatorService.saveWithNewTransaction(i);
-//                }
             });
-
         }
-        if (duplicateWellList.isEmpty()){
+        if (duplicateWellMap.isEmpty()){
             this.sessionMemoryService.getSessionMemory().remove(sessionID);
             return "redirect:/pump-card";
         } else {
             redirectAttributes.addFlashAttribute("sessionID", sessionID);
             redirectAttributes.addFlashAttribute("separator", separator);
-            redirectAttributes.addFlashAttribute("duplicateWellList", duplicateWellList);
+            redirectAttributes.addFlashAttribute("duplicateWellMap", duplicateWellMap);
             return "redirect:/well-dublicates";
         }
     }

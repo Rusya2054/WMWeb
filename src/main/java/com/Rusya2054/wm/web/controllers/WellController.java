@@ -1,29 +1,38 @@
 package com.Rusya2054.wm.web.controllers;
 
+import com.Rusya2054.wm.web.files.IndicatorInputDataValidator;
 import com.Rusya2054.wm.web.files.InputPumpCardValidator;
+import com.Rusya2054.wm.web.files.SeparatorValidator;
+import com.Rusya2054.wm.web.files.parser.InputFileParser;
+import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.PumpCard;
 import com.Rusya2054.wm.web.models.Well;
+import com.Rusya2054.wm.web.services.IndicatorService;
 import com.Rusya2054.wm.web.services.PumpCardService;
 import com.Rusya2054.wm.web.services.SessionMemoryService;
 import com.Rusya2054.wm.web.services.WellService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.SessionAttributes;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Controller
 @RequiredArgsConstructor
-@SessionAttributes({"sessionID", "separator", "duplicateWellList"})
+@SessionAttributes({"sessionID", "separator", "duplicateWellMap"})
 public class WellController {
     private final WellService wellService;
     private final PumpCardService pumpCardService;
+    private final IndicatorService indicatorService;
     private final SessionMemoryService sessionMemoryService;
 
     @GetMapping("/well/{id}")
     public String getWellPage(@PathVariable Long id, Model model){
+        // TODO: добавить переход на удаление
         Well well = wellService.getWell(id);
         PumpCard pumpCard = pumpCardService.getPumpCardByWell(well);
         if (well != null){
@@ -58,9 +67,43 @@ public class WellController {
     @GetMapping("/well-dublicates")
     public String showWellDublicates(Model model) {
         Long sessionID = (long)model.getAttribute("sessionID");
+        // TODO: проверка по sessionID
         if (sessionMemoryService.getSessionMemory().containsKey(sessionID)){
-            System.out.println();
+
         }
         return "well-dublicates";
+    }
+
+    @Data
+    public static class RequestData {
+        private Long id;
+        private String name;
+        private Long sessionID ;
+        private String separator;
+    }
+
+    @PostMapping("/well-dublicates/upload")
+    public String uploadWellDublicates(@RequestBody Map<String, RequestData> requestData, Model model){
+        Long[] sessionID = {null};
+        requestData.forEach((key, value) -> {
+            sessionID[0] = value.getSessionID();
+            String separator = SeparatorValidator.validate(value.getSeparator());
+            if (sessionMemoryService.getSessionMemory().containsKey(sessionID[0])){
+                Well well = wellService.getWell(value.getId(), value.getName());
+
+                Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemoryService.getSessionMemory().get(sessionID[0]);
+
+                Set<Indicator> indicators = IndicatorInputDataValidator.formIndicator(
+                        InputFileParser.parseIndicatorsFile(this.sessionMemoryService.getSessionMemory().get(sessionID[0]).get(key), separator),
+                        separator,
+                        true,
+                        well
+                        );
+                indicatorService.saveIndicators(indicators, well);
+            }
+        });
+        sessionMemoryService.getSessionMemory().remove(sessionID[0]);
+        model.addAttribute("wellList", wellService.getWellList());
+        return "data-manager";
     }
 }

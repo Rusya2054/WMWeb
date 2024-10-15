@@ -20,6 +20,8 @@ public class IndicatorService {
     private final IndicatorRepository indicatorRepository;
 
     public void saveIndicators(Set<Indicator> indicators, Well well){
+        indicators.forEach(indicator -> indicator.setWell(well));
+
         List<Indicator> dbIndicators = indicatorRepository.findByWell(well);
         Set<Indicator> indicatorsToUpload = new TreeSet<>(Comparator.comparing(Indicator::getDateTime));
         indicatorsToUpload.addAll(indicators);
