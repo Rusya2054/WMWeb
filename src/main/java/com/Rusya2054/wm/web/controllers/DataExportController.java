@@ -37,7 +37,7 @@ public class DataExportController {
             return new WellWrapper(well, minDate.format(formatter), maxDate.format(formatter));
         }).toList();
         model.addAttribute("wells", wellWrapperList);
-         return "export";
+        return "export";
     }
 
     @Data
@@ -46,21 +46,17 @@ public class DataExportController {
         private String maxDate;
     }
 
-
     @PostMapping("/export/files")
-    public ResponseEntity<String> exportToFiles(@RequestBody Map<Long, RequestExportData> requestExportDataMap){
+    public Map<String, Object> exportToFiles(@RequestBody Map<Long, RequestExportData> requestExportDataMap){
         // TODO: заменить на Map<String, ResponseEntity<String>>
-        // TODO: разобраться с проблемой на "\n"
-        StringBuilder content = new StringBuilder();
-        requestExportDataMap.forEach((key, value) -> {
-            content.append(key).append("\n");
-            content.append("\t").append(value);
-            content.append("\n");
-        });
-        System.out.println(content.toString());
-        return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE) // Указываем тип контента
-        .body(content.toString());
+        // TODO: проверить с "\n"
+        // TODO: indicatorService отправляем ID и интервалы,а получаем в StringBuilder
+        Map<String, Object> exportMap = new HashMap<>(3);
+        exportMap.put("1.txt", "file - 1");
+        exportMap.put("2.txt", "file - 2");
+        exportMap.put("777.txt", "file - 777");
+
+        return exportMap;
     }
 
     @PostMapping("/export/filter")

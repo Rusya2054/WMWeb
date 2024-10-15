@@ -13,6 +13,7 @@ import com.Rusya2054.wm.web.services.SessionMemoryService;
 import com.Rusya2054.wm.web.services.WellService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @SessionAttributes({"sessionID", "separator", "duplicateWellMap"})
@@ -67,11 +69,12 @@ public class WellController {
     @GetMapping("/well-dublicates")
     public String showWellDublicates(Model model) {
         Long sessionID = (long)model.getAttribute("sessionID");
-        // TODO: проверка по sessionID
         if (sessionMemoryService.getSessionMemory().containsKey(sessionID)){
-
+            return "well-dublicates";
+        } else {
+            log.warn("sessionID not founded");
+            return "data-manager";
         }
-        return "well-dublicates";
     }
 
     @Data
@@ -103,7 +106,8 @@ public class WellController {
             }
         });
         sessionMemoryService.getSessionMemory().remove(sessionID[0]);
+        model.asMap().clear();
         model.addAttribute("wellList", wellService.getWellList());
-        return "data-manager";
+        return "redirect:/pump-card";
     }
 }

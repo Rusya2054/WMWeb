@@ -40,7 +40,7 @@ public class InputPumpCardValidator {
         if (!typeSize.isEmpty()){
             pumpCard.setTypeSize(typeSize);
         }
-        if (!field.isEmpty() && (pumpCard.getWell().getField() == null) || !pumpCard.getWell().getField().equalsIgnoreCase(field) ){
+        if (!field.isEmpty() && (pumpCard.getWell().getField() == null) || (pumpCard.getWell().getField() != null && !pumpCard.getWell().getField().equalsIgnoreCase(field)) ){
             pumpCard.getWell().setField(field);
         }
 

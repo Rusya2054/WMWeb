@@ -113,14 +113,13 @@ public class DataManagerController {
                 }
                 Set<Indicator> indicators = IndicatorInputDataValidator.formIndicator(InputFileParser.parseIndicatorsFile(e.getValue(), separator),
                         separator, byFileName, well);
-                // TODO: проверить indicators на качество
                 List<Well> dbWellList = wellService.getWellsByName(well);
                 if (!dbWellList.isEmpty()){
                     duplicateWellMap.put(e.getKey(), dbWellList);
                 } else{
                     Well finalDbWell = wellService.wellSave(well);
                     indicatorService.saveIndicators(indicators, finalDbWell);
-                    this.sessionMemoryService.getSessionMemory().get(sessionID).remove(e.getKey());
+//                    this.sessionMemoryService.getSessionMemory().get(sessionID).remove(e.getKey());
                 }
             });
         }
