@@ -43,4 +43,13 @@ public class WellService {
     public List<Well> getWellList(){
         return wellRepository.findAll();
     }
+
+    public String getTxtFileName(Long id){
+        Well well = wellRepository.findById(id).orElse(null);
+        if (well == null){
+            return "";
+        } else {
+            return well.getName()+"_"+well.getField()+".txt";
+        }
+    }
 }

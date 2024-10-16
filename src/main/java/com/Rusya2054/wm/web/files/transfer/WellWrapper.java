@@ -1,4 +1,4 @@
-package com.Rusya2054.wm.web.files.export;
+package com.Rusya2054.wm.web.files.transfer;
 
 import com.Rusya2054.wm.web.models.Well;
 import lombok.Data;

@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 @Service
 public class IndicatorService {
     private final IndicatorRepository indicatorRepository;
+    private final WellService wellService;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void saveIndicators(Set<Indicator> indicators, Well well){
         indicators.forEach(indicator -> indicator.setWell(well));
@@ -55,5 +59,58 @@ public class IndicatorService {
         } else {
             return minDate;
         }
+    }
+
+    public String getIndicatorStringData(Long id, LocalDateTime minDateTime, LocalDateTime maxDateTime){
+        Well well = wellService.getWell(id);
+        LocalDateTime[] localDateTimes = {minDateTime, maxDateTime};
+        Arrays.sort(localDateTimes, LocalDateTime::compareTo);
+        LocalDateTime validatedMinDateTime = localDateTimes[0];
+        LocalDateTime validatedMaxDateTime = localDateTimes[1];
+
+        if (well.getId() != null){
+            List<Indicator> indicators = indicatorRepository
+                    .findByWell(well)
+                    .stream()
+                    .filter(i->(i.getDateTime().isAfter(validatedMinDateTime) && i.getDateTime().isBefore(validatedMaxDateTime)))
+                    .toList();
+            return indicatorToString(indicators);
+        }
+        return "";
+    }
+
+    public String indicatorToString(List<Indicator> indicators){
+        StringBuilder stringBuilder = new StringBuilder(indicators.size());
+        stringBuilder.append("wellID\tRotationDirection\tDate\tFrequency\tCurPhaseA\tCurPhaseB\tCurPhaseC\tCurrentImbalance\tLineCurrent\tLineVoltage\tActivePower\tTotalPower\tPowerFactor\tEngineLoad\tInputVoltageAB\tInputVoltageBC\tInputVoltageCA\tIntakePressure\tEngineTemp\tLiquidTemp\tVibrationAccRadial\tVibrationAccAxial\tliquidflowRatio\tisolationResistance\n");
+
+        indicators.forEach(indicator -> {
+            StringBuilder line = new StringBuilder(25);
+            line.append(indicator.getWell().getName()).append('\t');
+            line.append(indicator.getRotationDirection()).append('\t');
+            line.append(indicator.getDateTime().format(formatter)).append('\t');
+            line.append(indicator.getFrequency()).append('\t');
+            line.append(indicator.getCurPhaseA()).append('\t');
+            line.append(indicator.getCurPhaseB()).append('\t');
+            line.append(indicator.getCurPhaseC()).append('\t');
+            line.append(indicator.getCurrentImbalance()).append('\t');
+            line.append(indicator.getLineCurrent()).append('\t');
+            line.append(indicator.getLineVoltage()).append('\t');
+            line.append(indicator.getActivePower()).append('\t');
+            line.append(indicator.getTotalPower()).append('\t');
+            line.append(indicator.getEngineLoad()).append('\t');
+            line.append(indicator.getInputVoltageAB()).append('\t');
+            line.append(indicator.getInputVoltageBC()).append('\t');
+            line.append(indicator.getInputVoltageCA()).append('\t');
+            line.append(indicator.getIntakePressure()).append('\t');
+            line.append(indicator.getEngineTemp()).append('\t');
+            line.append(indicator.getLiquidTemp()).append('\t');
+            line.append(indicator.getVibrationAccRadial()).append('\t');
+            line.append(indicator.getVibrationAccAxial()).append('\t');
+            line.append(indicator.getLiquidFlowRatio()).append('\t');
+            line.append(indicator.getIsolationResistance()).append('\t');
+            line.append("\n");
+            stringBuilder.append(line);
+        });
+        return stringBuilder.toString().replace("null", "-1");
     }
 }

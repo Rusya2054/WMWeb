@@ -10,6 +10,7 @@
             align-items: center;
             height: 100vh; /* Занять всю высоту окна */
             margin: 0;
+            flex-direction: column;
             background-color: #f0f8ff; /* Светлый фон */
         }
 
@@ -36,7 +37,7 @@
             border-radius: 5px; /* Скругленные углы */
         }
 
-        input[type="submit"] {
+        #deleteBtn, input[type="submit"] {
             background-color: #007bff; /* Цвет кнопки */
             color: white; /* Цвет текста кнопки */
             border: none; /* Убрать границу */
@@ -45,6 +46,18 @@
 
         input[type="submit"]:hover {
             background-color: #0056b3; /* Цвет кнопки при наведении */
+        }
+        #deleteBtn {
+            width: 17%; /* Полная ширина для полей ввода */
+            padding: 10px;
+            margin: 10px 0; /* Отступы между полями */
+            border: 1px solid #007bff; /* Граница поля */
+            border-radius: 5px; /* Скругленные углы */
+        }
+
+        #deleteBtn:hover {
+            background-color: #ab343a;
+            border: 1px solid #ab343a;
         }
     </style>
     <script>
@@ -59,37 +72,53 @@
                 }
             }
         }
+
+        function deleteWell(id){
+            requestData = {id: id};
+
+            fetch('/well/delete/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+        }
     </script>
 </head>
 <body>
     <form action="/well/${well.id?c}/update">
-        ID скважины: ${well.id?c}</br>
-        Название скважины: ${well.name}</br></br>
+        ID скважины: ${well.id?c}<br>
+        Название скважины: ${well.name}<br><br>
         <datalist id="well-list"></datalist>
         <#if well.field?has_content>
-            Название месторождения: <input type="text" name="field" placeholder="${well.field}"/></br>
+            Название месторождения: <input type="text" name="field" placeholder="${well.field}"/><br>
         <#else>
-            <input type="text" name="field" placeholder="м-е отсутствует"/></br>
+            <input type="text" name="field" placeholder="м-е отсутствует"/><br>
         </#if>
         Типоразмер:
         <#if pumpCard.typeSize?has_content>
-            <input type="text" name="typeSize" placeholder="${pumpCard.typeSize}"/></br>
+            <input type="text" name="typeSize" placeholder="${pumpCard.typeSize}"/><br>
         <#else>
-            <input type="text" name="typeSize"/></br>
+            <input type="text" name="typeSize"/><br>
         </#if>
         Глубина спуска насоса, м:
         <#if pumpCard.pumpDepth?has_content>
-            <input type="text" name="pumpDepth" placeholder="${pumpCard.pumpDepth}"/></br>
+            <input type="text" name="pumpDepth" placeholder="${pumpCard.pumpDepth}"/><br>
         <#else>
-            <input type="text" name="pumpDepth"/></br>
+            <input type="text" name="pumpDepth"/><br>
         </#if>
         Последняя дата отказа:
         <#if pumpCard.lastFailureDate?has_content>
-            <input type="text" placeholder="${lastFailureDate}" name="lastFailureDate" oninput="inputDateHandler(this)"/></br>
+            <input type="text" placeholder="${lastFailureDate}" name="lastFailureDate" oninput="inputDateHandler(this)"/><br>
         <#else>
-            <input type="text" placeholder="ДД.MM.ГГГГ" name="lastFailureDate" oninput="inputDateHandler(this)"/></br>
+            <input type="text" placeholder="ДД.MM.ГГГГ" name="lastFailureDate" oninput="inputDateHandler(this)"/><br>
         </#if>
         <input type="submit" value="Обновить данные"/>
     </form>
+    <br>
+
+    <button id="deleteBtn" onclick="deleteWell(${well.id?c})">Удалить данные</button>
+
 </body>
 </html>

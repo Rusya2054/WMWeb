@@ -11,6 +11,7 @@ public final class IndicatorInputDataValidator {
 
 
     public static Indicator validate(String[] stringList){
+        // TODO: дебит жидкости и сопротивление не парсятся
         Indicator indicator = new Indicator();
         indicator.setRotationDirection(stringList[1]);
         indicator.setDateTime(parseDateTime(stringList[2]));
