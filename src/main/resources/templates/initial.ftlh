@@ -37,14 +37,24 @@
 <body>
     <h1>Исходные данные</h1>
     <hr>
-    <#list wells as well>
-        <p>
-            <#if well.field?has_content>
-                <b>${well.field}</b>
-            <#else>
-                <h3>Данных нет</h3>
-            </#if>
-        </p>
-    </#list>
+    <div id="wellList">
+        <#if wellListMap?has_content>
+            <#list wellListMap?keys as wells>
+                <div class="wellListInfo">
+                    <#list wellListMap[wells] as well>
+                        <div id="${well.id?c}" name="wellInfo">
+                            ${well.id} |
+                            <#if well.field?has_content>
+                                    <b>${well.field}</b>
+                                <#else>
+                                    <b>м-е отсутствует</b>
+                            </#if> | ${well.name} | <a href="/init/${well.id?c}"> Подробнее</a> <br>
+                        </div>
+                    </#list>
+                </div>
+                </br></br>
+            </#list>
+        </#if>
+    </div>
 </body>
 </html>

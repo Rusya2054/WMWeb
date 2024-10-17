@@ -1,5 +1,6 @@
 package com.Rusya2054.wm.web.services;
 
+import com.Rusya2054.wm.web.files.transfer.IndicatorWrapper;
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.repositories.IndicatorRepository;
@@ -27,6 +28,13 @@ public class IndicatorService {
     private final WellService wellService;
     private final PumpCardService pumpCardService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public List<Indicator> getIndicators(Well well){
+        return indicatorRepository.findByWell(well);
+    }
+    public List<IndicatorWrapper> getIndicatorWrapper(Well well){
+        return indicatorRepository.findByWell(well).stream().map(IndicatorWrapper::new).toList();
+    }
 
     public void saveIndicators(Set<Indicator> indicators, Well well){
         indicators.forEach(indicator -> indicator.setWell(well));
