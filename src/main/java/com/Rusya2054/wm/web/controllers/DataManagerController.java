@@ -1,7 +1,7 @@
 package com.Rusya2054.wm.web.controllers;
 
-import com.Rusya2054.wm.web.files.IndicatorInputDataValidator;
-import com.Rusya2054.wm.web.files.SeparatorValidator;
+import com.Rusya2054.wm.web.validators.IndicatorInputDataValidator;
+import com.Rusya2054.wm.web.validators.SeparatorValidator;
 import com.Rusya2054.wm.web.files.parser.InputFileParser;
 import com.Rusya2054.wm.web.files.reader.IndicatorReader;
 import com.Rusya2054.wm.web.models.Indicator;

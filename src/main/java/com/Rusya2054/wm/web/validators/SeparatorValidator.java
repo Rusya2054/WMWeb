@@ -1,4 +1,4 @@
-package com.Rusya2054.wm.web.files;
+package com.Rusya2054.wm.web.validators;
 
 public class SeparatorValidator{
 

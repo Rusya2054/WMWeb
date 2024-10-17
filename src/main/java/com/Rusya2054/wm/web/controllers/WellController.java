@@ -1,8 +1,8 @@
 package com.Rusya2054.wm.web.controllers;
 
-import com.Rusya2054.wm.web.files.IndicatorInputDataValidator;
-import com.Rusya2054.wm.web.files.InputPumpCardValidator;
-import com.Rusya2054.wm.web.files.SeparatorValidator;
+import com.Rusya2054.wm.web.validators.IndicatorInputDataValidator;
+import com.Rusya2054.wm.web.validators.InputPumpCardValidator;
+import com.Rusya2054.wm.web.validators.SeparatorValidator;
 import com.Rusya2054.wm.web.files.parser.InputFileParser;
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.PumpCard;
@@ -34,7 +34,6 @@ public class WellController {
 
     @GetMapping("/well/{id}")
     public String getWellPage(@PathVariable Long id, Model model){
-        // TODO: добавить переход на удаление
         Well well = wellService.getWell(id);
         PumpCard pumpCard = pumpCardService.getPumpCardByWell(well);
         if (well != null){

@@ -32,8 +32,8 @@ public final class InputFileParser {
         put(Columns.getLiquidTemp(), List.of("Tжид, °C", "Tжид. °C", "T° жидкости\n(°C)", "Тжидк.БВ", "Температура жидкости на приеме насоса , °C", "T окр, °C", "Температура жидкости", "LiquidTemp"));
         put(Columns.getVibrationAccRadial(), List.of("Вибр X/Y, м/с2", "Вибр X/Y. м/с2", "Среднеквадратичная вибрация по осям X и Y, g", "Вибрация XY", "Вибрация, g", "Вибр.XY, g", "Вибрация вала насоса по оси X", "VibrationAccRadial"));
         put(Columns.getVibrationAccAxial(), List.of("Вибр Z, м/с2", "Вибр Z. м/с2", "Вибрация по оси Z, g", "Вибрация Z", "Вибр. Z, g", "Вибр.Z, g", "Вибрация вала насоса по оси Y", "VibrationAccAxial"));
-        put(Columns.getLiquidflowRatio(), List.of("LiquidflowRatio"));
-        put(Columns.getIsolationResistance(), List.of("R, кОм", "Сопротивление изоляции, кОм", "Rиз, кОм", "R. кОм", "IsolationResistance"));
+        put(Columns.getLiquidflowRatio(), List.of("LiquidflowRatio", "liquidflowRatio"));
+        put(Columns.getIsolationResistance(), List.of("R, кОм", "Сопротивление изоляции, кОм", "Rиз, кОм", "R. кОм", "IsolationResistance", "isolationResistance"));
     }};
 
     public static List<String> parseIndicatorsFile(List<String> strings, String sep, int nRows){
@@ -114,8 +114,12 @@ public final class InputFileParser {
         List<String> emptyList = List.of("");
         List<String> emptyList1 = new ArrayList<>();
         List<String> nullList = Arrays.asList("first", null, "second", "third", null);;
+        List<String> well_164 = List.of(
+                "Номер\tДата, Время\tСобытие\tUвх.AB, В\tUвх.BC, В\tUвх.CA, В\tДисб.вх.U, %\tЧер.фаз\t№ кадра\tТобм, C\tUвых.пч, В\tFвых, Гц\tUвых. ТМПН, В\tIa ПЭД, А\tIb ПЭД, А\tIc ПЭД, А\tДисб.I ПЭД, %\tCos Ф\tЗагр.ПЭД, %\tRиз, кОм\tUdc, В\tPвх.эцн, кгс/см2\tPпэд, кгс/см2\tТвх.эцн, C\tTпэд, C\tТвых.эцн, C\tTпэд2, C\tВибр.XY, g\tВибр. Z, g\tFтурб, Гц\tАн.вх.1\tАн.вх.2\tIu, А\tАн.вх.3, ед.\tАн.вх.4, ед.\tIv, А\tIw, А\tНапр. вращ.\tТigbt, C\tРпэд, кВт\tSпэд, кВА\tЦифр.вх.\tРвх.су, кВт\tQвх.су, кВАр\tSвх.су, кВА\tВибр.X, g\tВибр.Y, g\tСост.ТМС\tPжидк.БВ, ат\tPбв, ат\tТжидк.БВ, C\tTбв, C\tВибр.X БВ, g\tВибр.Y БВ, g\tВибр.Z БВ, g\tТпер.бита, мс\tNвых, об/мин\tПричина записи\tСвязь ТМСП\tТип записи\n",
+                "1\t10.12.2023 23:40\tПараметры\t378\t381\t378\t0.5\tABC\t0\t40\t345\t47\t1366\t45342\t45370\t45492\t45414\t0.726\t60.1\t9999\t547\t45618\t655.35\t31\t40\t0\t0\t0\t0\t0\t0\t0\t78.6\t0\t0\t78.5\t79.1\tПрямое\t23\t35.6\t48.9\t100110\t0.5\t0\t0.6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t2820\tПериод времени\t0\tНормальная\n");
         // InputFileParser.parseIndicatorsFile(lst, "\t").stream().forEach(System.out::println);
-        InputFileParser.parseIndicatorsFile(nullList, "\t").stream().forEach(System.out::println);
+        // InputFileParser.parseIndicatorsFile(nullList, "\t").stream().forEach(System.out::println);
+        InputFileParser.parseIndicatorsFile(well_164, "\t").stream().forEach(System.out::println);
 
 //        InputFileParser.parseIndicatorsFile(emptyList, "\t").stream().forEach(System.out::println);
 //        InputFileParser.parseIndicatorsFile(emptyList1, "\t").stream().forEach(System.out::println);

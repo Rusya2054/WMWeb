@@ -37,4 +37,9 @@ public class PumpCardService {
             return pumpCard;
         }
     }
+
+    public void deletePumpCard(Well well){
+        PumpCard pumpCard = pumpCardRepository.findByWell(well);
+        pumpCardRepository.delete(pumpCard);
+    }
 }

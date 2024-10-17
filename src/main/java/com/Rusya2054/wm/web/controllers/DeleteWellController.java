@@ -11,40 +11,74 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 
 @Controller
 @RequiredArgsConstructor
+@SessionAttributes({"wellWrapperList"})
 public class DeleteWellController {
     private final IndicatorService indicatorService;
     private final WellService wellService;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Data
     public static class RequestData{
         private Long id;
     }
 
-    @PostMapping("/well/delete/")
-    public String deleteWell(@RequestBody RequestData requestData, Model model){
-        System.out.println("requestData: " + requestData.getId());
+    @PostMapping("/well/pre-delete")
+    public String distributionDeleteWell(@RequestBody RequestData requestData, RedirectAttributes redirectAttributes){
+        // TODO: добавить возможность получать весь список для удаляния(логика реализована, осталось вставить endPoind
         Long id = requestData.getId();
         Well well = wellService.getWell(id);
+
         if (id<0){
-            List<Well> wellList = wellService.getWellList();
-            model.addAttribute("wells", wellList);
-            return "all wells to delete";
+            List<WellWrapper> wellWrapperList = wellService.getWellList().stream().map(w -> new WellWrapper(w,
+                    indicatorService.getIndicatorMinDate(w).format(formatter),
+                    indicatorService.getIndicatorMaxDate(w).format(formatter))).toList();
+            redirectAttributes.addFlashAttribute("wellWrapperList", wellWrapperList);
+            return "redirect:/well/delete";
         } else if (well.getName() != null && !well.getName().isEmpty()) {
-            List<Well> oneWell = wellService.getWellsByName(well);
-            model.addAttribute("wells", oneWell);
-            return "redirect: ";
+            List<WellWrapper> wellWrapperList = wellService.getWellsByName(well).stream()
+                    .filter(w->w.getId().equals(id))
+                    .map(w -> new WellWrapper(w,
+                        indicatorService.getIndicatorMinDate(w).format(formatter),
+                        indicatorService.getIndicatorMaxDate(w).format(formatter))).toList();
+            redirectAttributes.addFlashAttribute("wellWrapperList", wellWrapperList);
+            return "redirect:/well/delete";
         } else {
-            List<Well> wellList = wellService.getWellList();
-            model.addAttribute("wells", wellList);
             return "redirect:/pump-card";
         }
-
+    }
+    @GetMapping("/well/delete")
+    public String getDeleteWellPage(Model model){
+        if (model.asMap().isEmpty()){
+            model.addAttribute("wellList", wellService.getWellList());
+            return "data-manager";
+        } else {
+            return "delete";
+        }
 
     }
+
+    @PostMapping("/well/delete-data")
+    public String deleteWellData(@RequestBody Map<Long, DataExportController.RequestExportData> requestDeleteDataMap){
+        requestDeleteDataMap.forEach((id, wellWrapper) -> {
+            LocalDateTime minDateTime = LocalDate.parse(wellWrapper.getMinDate(), formatter).atStartOfDay();
+            LocalDateTime maxDateTime = LocalDate.parse(wellWrapper.getMaxDate(), formatter).plusDays(1L).atStartOfDay();
+            indicatorService.deleteIndicators(id, minDateTime, maxDateTime);
+        });
+        return "redirect:/pump-card";
+    }
+
+
+
 }

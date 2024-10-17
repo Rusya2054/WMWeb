@@ -75,14 +75,22 @@
 
         function deleteWell(id){
             requestData = {id: id};
-
-            fetch('/well/delete/', {
+            fetch('/well/pre-delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(requestData)
-            });
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = response.url;
+                } else {
+                    console.error('Ошибка при удалении');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });;
         }
     </script>
 </head>
@@ -91,8 +99,9 @@
         ID скважины: ${well.id?c}<br>
         Название скважины: ${well.name}<br><br>
         <datalist id="well-list"></datalist>
+            Название месторождения:
         <#if well.field?has_content>
-            Название месторождения: <input type="text" name="field" placeholder="${well.field}"/><br>
+            <input type="text" name="field" placeholder="${well.field}"/><br>
         <#else>
             <input type="text" name="field" placeholder="м-е отсутствует"/><br>
         </#if>

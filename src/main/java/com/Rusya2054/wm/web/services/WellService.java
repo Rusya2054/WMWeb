@@ -52,4 +52,8 @@ public class WellService {
             return well.getName()+"_"+well.getField()+".txt";
         }
     }
+
+    public void deleteWell(Well well){
+        wellRepository.delete(well);
+    }
 }

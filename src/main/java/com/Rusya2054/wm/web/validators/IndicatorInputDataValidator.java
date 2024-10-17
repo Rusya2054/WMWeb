@@ -1,4 +1,4 @@
-package com.Rusya2054.wm.web.files;
+package com.Rusya2054.wm.web.validators;
 
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.Well;
@@ -11,7 +11,6 @@ public final class IndicatorInputDataValidator {
 
 
     public static Indicator validate(String[] stringList){
-        // TODO: дебит жидкости и сопротивление не парсятся
         Indicator indicator = new Indicator();
         indicator.setRotationDirection(stringList[1]);
         indicator.setDateTime(parseDateTime(stringList[2]));
@@ -20,21 +19,22 @@ public final class IndicatorInputDataValidator {
         indicator.setCurPhaseB(floatParser(stringList[5]));
         indicator.setCurPhaseC(floatParser(stringList[6]));
         indicator.setCurrentImbalance(Math.round(floatParser(stringList[7])));
-        indicator.setLineVoltage(floatParser(stringList[8]));
-        indicator.setActivePower(floatParser(stringList[9]));
-        indicator.setTotalPower(floatParser(stringList[10]));
-        indicator.setPowerFactor(floatParser(stringList[11]));
-        indicator.setEngineLoad(floatParser(stringList[12]));
-        indicator.setInputVoltageAB(floatParser(stringList[13]));
-        indicator.setInputVoltageBC(floatParser(stringList[14]));
-        indicator.setInputVoltageCA(floatParser(stringList[15]));
-        indicator.setIntakePressure(floatParser(stringList[16]));
-        indicator.setEngineTemp(floatParser(stringList[17]));
-        indicator.setLiquidTemp(floatParser(stringList[18]));
-        indicator.setVibrationAccRadial(floatParser(stringList[19]));
-        indicator.setVibrationAccAxial(floatParser(stringList[20]));
-        indicator.setLiquidFlowRatio(floatParser(stringList[21]));
-        indicator.setIsolationResistance(floatParser(stringList[22]));
+        indicator.setLineCurrent(floatParser(stringList[8]));
+        indicator.setLineVoltage(floatParser(stringList[9]));
+        indicator.setActivePower(floatParser(stringList[10]));
+        indicator.setTotalPower(floatParser(stringList[11]));
+        indicator.setPowerFactor(floatParser(stringList[12]));
+        indicator.setEngineLoad(floatParser(stringList[13]));
+        indicator.setInputVoltageAB(floatParser(stringList[14]));
+        indicator.setInputVoltageBC(floatParser(stringList[15]));
+        indicator.setInputVoltageCA(floatParser(stringList[16]));
+        indicator.setIntakePressure(floatParser(stringList[17]));
+        indicator.setEngineTemp(floatParser(stringList[18]));
+        indicator.setLiquidTemp(floatParser(stringList[19]));
+        indicator.setVibrationAccRadial(floatParser(stringList[20]));
+        indicator.setVibrationAccAxial(floatParser(stringList[21]));
+        indicator.setLiquidFlowRatio(floatParser(stringList[22]));
+        indicator.setIsolationResistance(floatParser(stringList[23]));
         return indicator;
     }
 

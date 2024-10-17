@@ -3,7 +3,10 @@ package com.Rusya2054.wm.web.services;
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.repositories.IndicatorRepository;
+import com.Rusya2054.wm.web.validators.DateTimeValidator;
+import com.Rusya2054.wm.web.validators.DateTimeValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +19,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class IndicatorService {
     private final IndicatorRepository indicatorRepository;
     private final WellService wellService;
+    private final PumpCardService pumpCardService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void saveIndicators(Set<Indicator> indicators, Well well){
@@ -46,6 +51,7 @@ public class IndicatorService {
     public LocalDateTime getIndicatorMaxDate(Well well){
         LocalDateTime maxDate = indicatorRepository.findMaxDate(well.getId());
         if (maxDate == null){
+            log.warn("Incorrect minimum DateTime in {}", well);
             return LocalDateTime.of(1970, 1, 1, 0, 0, 0);
         } else {
             return maxDate;
@@ -55,16 +61,35 @@ public class IndicatorService {
     public LocalDateTime getIndicatorMinDate(Well well){
         LocalDateTime minDate = indicatorRepository.findMinDate(well.getId());
         if (minDate == null){
+            log.warn("Incorrect maximum DateTime in {}", well);
             return LocalDateTime.of(1970, 1, 1, 0, 0, 0);
         } else {
             return minDate;
         }
     }
 
+    public void deleteIndicators(Long id, LocalDateTime minDateTime, LocalDateTime maxDateTime){
+        Well well = wellService.getWell(id);
+        LocalDateTime[] localDateTimes = DateTimeValidator.sortDateTimes(minDateTime, maxDateTime);
+        LocalDateTime validatedMinDateTime = localDateTimes[0];
+        LocalDateTime validatedMaxDateTime = localDateTimes[1];
+        List<Indicator>indicators = indicatorRepository
+                .findByWell(well)
+                .stream()
+                .filter(i->(i.getDateTime().isAfter(validatedMinDateTime) && i.getDateTime().isBefore(validatedMaxDateTime)))
+                .toList();
+        indicatorRepository.deleteAll(indicators);
+        List<Indicator> dbIndicators = indicatorRepository.findByWell(well);
+        if (dbIndicators.isEmpty()){
+            pumpCardService.deletePumpCard(well);
+            wellService.deleteWell(well);
+            log.info("Deleted well {}", well);
+        }
+    }
+
     public String getIndicatorStringData(Long id, LocalDateTime minDateTime, LocalDateTime maxDateTime){
         Well well = wellService.getWell(id);
-        LocalDateTime[] localDateTimes = {minDateTime, maxDateTime};
-        Arrays.sort(localDateTimes, LocalDateTime::compareTo);
+        LocalDateTime[] localDateTimes = DateTimeValidator.sortDateTimes(minDateTime, maxDateTime);
         LocalDateTime validatedMinDateTime = localDateTimes[0];
         LocalDateTime validatedMaxDateTime = localDateTimes[1];
 
@@ -82,7 +107,6 @@ public class IndicatorService {
     public String indicatorToString(List<Indicator> indicators){
         StringBuilder stringBuilder = new StringBuilder(indicators.size());
         stringBuilder.append("wellID\tRotationDirection\tDate\tFrequency\tCurPhaseA\tCurPhaseB\tCurPhaseC\tCurrentImbalance\tLineCurrent\tLineVoltage\tActivePower\tTotalPower\tPowerFactor\tEngineLoad\tInputVoltageAB\tInputVoltageBC\tInputVoltageCA\tIntakePressure\tEngineTemp\tLiquidTemp\tVibrationAccRadial\tVibrationAccAxial\tliquidflowRatio\tisolationResistance\n");
-
         indicators.forEach(indicator -> {
             StringBuilder line = new StringBuilder(25);
             line.append(indicator.getWell().getName()).append('\t');
@@ -97,6 +121,7 @@ public class IndicatorService {
             line.append(indicator.getLineVoltage()).append('\t');
             line.append(indicator.getActivePower()).append('\t');
             line.append(indicator.getTotalPower()).append('\t');
+            line.append(indicator.getPowerFactor()).append('\t');
             line.append(indicator.getEngineLoad()).append('\t');
             line.append(indicator.getInputVoltageAB()).append('\t');
             line.append(indicator.getInputVoltageBC()).append('\t');

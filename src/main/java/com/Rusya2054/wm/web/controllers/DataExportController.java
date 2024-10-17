@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -33,7 +33,25 @@ public class DataExportController {
             LocalDateTime minDate = indicatorService.getIndicatorMinDate(well);
             return new WellWrapper(well, minDate.format(formatter), maxDate.format(formatter));
         }).toList();
-        model.addAttribute("wells", wellWrapperList);
+        Map<String, List<WellWrapper>> wellListMap = wellList
+                .stream()
+                .map(well -> {
+                    var field = well.getField();
+                    return Objects.requireNonNullElse(field, "м-е отсутствует");
+                })
+                .distinct()
+                .collect(Collectors
+                        .toMap(key -> key,
+                                key ->
+                                wellWrapperList
+                                .stream()
+                                .filter(well -> {
+                                    return Objects.requireNonNullElse(well.getField(), "м-е отсутствует").equals(key);
+                                    }).toList(),
+                                (existing, replacement) -> existing,
+                                () -> new TreeMap<String, List<WellWrapper>>(String::compareTo)
+                                ));
+        model.addAttribute("wellListMap", wellListMap);
         return "export";
     }
 
@@ -49,7 +67,7 @@ public class DataExportController {
         Map<String, String> exportMap = new HashMap<>(requestExportDataMap.size());
         requestExportDataMap.forEach((key, value) ->{
             LocalDateTime minDate = LocalDate.parse(value.getMinDate(), formatter).atStartOfDay();
-            LocalDateTime maxDate = LocalDate.parse(value.getMaxDate(), formatter).atStartOfDay();
+            LocalDateTime maxDate = LocalDate.parse(value.getMaxDate(), formatter).plusDays(1L).atStartOfDay();
 
             exportMap.put(wellService.getTxtFileName(key), indicatorService.getIndicatorStringData(key, minDate, maxDate));
         });
