@@ -1,6 +1,7 @@
 package com.Rusya2054.wm.web.services;
 
 import com.Rusya2054.wm.web.files.transfer.IndicatorWrapper;
+import com.Rusya2054.wm.web.files.transfer.WellWrapper;
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.repositories.IndicatorRepository;
@@ -8,6 +9,9 @@ import com.Rusya2054.wm.web.validators.DateTimeValidator;
 import com.Rusya2054.wm.web.validators.DateTimeValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -23,6 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@EnableAsync
 public class IndicatorService {
     private final IndicatorRepository indicatorRepository;
     private final WellService wellService;
@@ -63,6 +69,48 @@ public class IndicatorService {
             return LocalDateTime.of(1970, 1, 1, 0, 0, 0);
         } else {
             return maxDate;
+        }
+    }
+
+
+    public List<WellWrapper> createWellWrappers(List<Well> wellList, DateTimeFormatter formatter) {
+        List<CompletableFuture<WellWrapper>> futures = wellList.stream()
+                .map(well -> {
+                    CompletableFuture<LocalDateTime> maxDateFuture = this.getAsyncIndicatorMaxDate(well);
+                    CompletableFuture<LocalDateTime> minDateFuture = this.getAsyncIndicatorMinDate(well);
+
+                    return maxDateFuture.thenCombine(minDateFuture, (maxDate, minDate) -> {
+                        String formattedMaxDate = (maxDate != null) ? maxDate.format(formatter) : "1970-01-01";
+                        String formattedMinDate = (minDate != null) ? minDate.format(formatter) : "1970-01-01";
+                        return new WellWrapper(well, formattedMinDate, formattedMaxDate);
+                    });
+                })
+                .toList();
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
+    }
+
+    @Async
+    public CompletableFuture<LocalDateTime> getAsyncIndicatorMinDate(Well well){
+        LocalDateTime minDate = indicatorRepository.findMinDate(well.getId());
+        if (minDate == null){
+            log.warn("Async Incorrect minimum DateTime in {}", well);
+            return CompletableFuture.completedFuture(LocalDateTime.of(1970, 1, 1, 0, 0, 0));
+        } else {
+            return CompletableFuture.completedFuture(minDate);
+        }
+    }
+
+    @Async
+    public CompletableFuture<LocalDateTime> getAsyncIndicatorMaxDate(Well well){
+        LocalDateTime maxDate = indicatorRepository.findMaxDate(well.getId());
+        if (maxDate == null){
+            log.warn("Async Incorrect maximum DateTime in {}", well);
+            return CompletableFuture.completedFuture(LocalDateTime.of(1970, 1, 1, 0, 0, 0));
+        } else {
+            return CompletableFuture.completedFuture(maxDate);
         }
     }
 

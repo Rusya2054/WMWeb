@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -24,15 +25,15 @@ public class DataExportController {
     private final IndicatorService indicatorService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-
     @GetMapping("/export")
     public String getExportPage(Model model){
+        // TODO: медленно
+        LocalDateTime start1 = LocalDateTime.now();
         List<Well> wellList = wellService.getWellList();
-        List<WellWrapper> wellWrapperList = wellList.stream().map((well) -> {
-            LocalDateTime maxDate = indicatorService.getIndicatorMaxDate(well);
-            LocalDateTime minDate = indicatorService.getIndicatorMinDate(well);
-            return new WellWrapper(well, minDate.format(formatter), maxDate.format(formatter));
-        }).toList();
+        List<WellWrapper> wellWrapperList = indicatorService.createWellWrappers(wellList, formatter);
+        System.out.println(LocalDateTime.now());
+        System.out.println(start1);
+        LocalDateTime start2 = LocalDateTime.now();
         Map<String, List<WellWrapper>> wellListMap = wellList
                 .stream()
                 .map(well -> {
@@ -51,6 +52,9 @@ public class DataExportController {
                                 (existing, replacement) -> existing,
                                 () -> new TreeMap<String, List<WellWrapper>>(String::compareTo)
                                 ));
+        System.out.println(LocalDateTime.now());
+        System.out.println(start2);
+        // model.addAttribute("wellListMap", new HashMap<>());
         model.addAttribute("wellListMap", wellListMap);
         return "export";
     }
