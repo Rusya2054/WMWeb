@@ -92,6 +92,23 @@
 
     </style>
     <script>
+        function toFieds(){
+            requestData = {from: "export"}
+
+            fetch('/fields', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            }).then(response => {
+                if (response.ok){
+                    window.location.href = response.url;
+                } else {
+                    console.error('Ошибка при переходе');
+                }
+            });
+        }
     </script>
 </head>
 <body>
@@ -113,6 +130,6 @@
         <button type="submit">Загрузить файлы</button>
     </form>
     <br>
-    <input type="button" id="exportBtn" value="Экспорт данных" onclick="window.location.href='/export'">
+    <input type="button" id="exportBtn" value="Экспорт данных" onclick="toFieds()">
 </body>
 </html>

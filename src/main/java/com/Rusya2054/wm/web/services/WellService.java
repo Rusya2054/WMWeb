@@ -14,6 +14,14 @@ import java.util.List;
 public class WellService {
     private final WellRepository wellRepository;
 
+    public List<String> getUniqueFields(){
+        return wellRepository.findUniqueFields();
+    }
+
+    public List<Well> getWellsByField (String field){
+        return wellRepository.findWellsByField(field).stream().map(this::getWell).toList();
+    }
+
     public Well wellSave(Well well){
         List<Well> dbWellList = wellRepository.findByName(well.getName());
         if (dbWellList.isEmpty()){

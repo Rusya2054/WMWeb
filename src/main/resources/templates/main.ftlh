@@ -39,11 +39,29 @@
             background-color: #0056b3; /* Цвет кнопки при наведении */
         }
     </style>
+<script>
+    function toFieds(){
+        requestData = {from: "init"}
+        fetch('/fields', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        }).then(response => {
+            if (response.ok){
+                window.location.href = response.url;
+            } else {
+                console.error('Ошибка при переходе');
+            }
+        });
+    }
+</script>
 </head>
 <body>
     <h1>База Данных Well Manager</h1>
     <hr>
-    <input type="button" value="Исходные данные" onclick="window.location.href='/init'">
+    <input type="button" value="Исходные данные" onclick="toFieds()">
     <input type="button" value="Менеджер данных" onclick="window.location.href='/pump-card'">
     <input type="button" value="Визуализация данных">
 </body>

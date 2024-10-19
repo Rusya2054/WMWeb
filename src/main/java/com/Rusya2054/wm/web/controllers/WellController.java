@@ -1,5 +1,6 @@
 package com.Rusya2054.wm.web.controllers;
 
+import com.Rusya2054.wm.web.controllers.request.RequestFromData;
 import com.Rusya2054.wm.web.validators.IndicatorInputDataValidator;
 import com.Rusya2054.wm.web.validators.InputPumpCardValidator;
 import com.Rusya2054.wm.web.validators.SeparatorValidator;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -25,12 +27,28 @@ import java.util.Set;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-@SessionAttributes({"sessionID", "separator", "duplicateWellMap"})
+@SessionAttributes({"sessionID", "separator", "duplicateWellMap", "from"})
 public class WellController {
     private final WellService wellService;
     private final PumpCardService pumpCardService;
     private final IndicatorService indicatorService;
     private final SessionMemoryService sessionMemoryService;
+
+    @PostMapping("/fields")
+    public String handleFieldsPost(@RequestBody RequestFromData requestFieldData, RedirectAttributes redirectAttributes){
+        redirectAttributes.addFlashAttribute("from", requestFieldData.getFrom());
+        return "redirect:/fields";
+    }
+
+    @GetMapping("/fields")
+    public String getFieldsPage(Model model) {
+        List<String> fields = wellService.getUniqueFields();
+        // TODO: рассортировать месторождения по названию
+        model.addAttribute("fields", fields);
+        // TODO: если длина 1 то переход на основную страницу
+        return "fields";
+    }
+
 
     @GetMapping("/well/{id}")
     public String getWellPage(@PathVariable Long id, Model model){

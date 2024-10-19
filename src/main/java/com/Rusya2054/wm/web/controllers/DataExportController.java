@@ -1,5 +1,6 @@
 package com.Rusya2054.wm.web.controllers;
 
+import com.Rusya2054.wm.web.controllers.request.RequestFieldData;
 import com.Rusya2054.wm.web.files.transfer.WellWrapper;
 import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.services.IndicatorService;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,20 +22,22 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
+@SessionAttributes({"field"})
 public class DataExportController {
     private final WellService wellService;
     private final IndicatorService indicatorService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    @PostMapping("/export")
+    public String exportPageHandler(@RequestBody RequestFieldData requestFieldData, RedirectAttributes redirectAttributes){
+        redirectAttributes.addFlashAttribute("field", requestFieldData.getField());
+        return "redirect:/export";
+    }
+
     @GetMapping("/export")
     public String getExportPage(Model model){
-        // TODO: медленно
-        LocalDateTime start1 = LocalDateTime.now();
-        List<Well> wellList = wellService.getWellList();
+        List<Well> wellList = wellService.getWellsByField((String) model.asMap().get("field"));
         List<WellWrapper> wellWrapperList = indicatorService.createWellWrappers(wellList, formatter);
-        System.out.println(LocalDateTime.now());
-        System.out.println(start1);
-        LocalDateTime start2 = LocalDateTime.now();
         Map<String, List<WellWrapper>> wellListMap = wellList
                 .stream()
                 .map(well -> {
@@ -52,9 +56,6 @@ public class DataExportController {
                                 (existing, replacement) -> existing,
                                 () -> new TreeMap<String, List<WellWrapper>>(String::compareTo)
                                 ));
-        System.out.println(LocalDateTime.now());
-        System.out.println(start2);
-        // model.addAttribute("wellListMap", new HashMap<>());
         model.addAttribute("wellListMap", wellListMap);
         return "export";
     }
