@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Well Data Visualization</title>
+    <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+    <style>
+        #container {
+            display: flex;
+        }
+        #left-panel {
+            width: 30%;
+            padding: 10px;
+        }
+        #right-panel {
+            width: 70%;
+        }
+        .checkbox-label {
+            display: block;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="left-panel">
+            <h3>Параметр</h3>
+            <div id="checkbox-list"></div>
+        </div>
+        <div id="right-panel">
+            <div id="chart-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const jsonData = {
+            "wellID": [101, 102, 103],
+            "RotationDirection": ["CW", "CW", "CCW"],
+            "Date": ["2024-10-01 12:00:00", "2024-10-02 12:00:00", "2024-10-03 12:00:00"],
+            "Frequency": [100.5, null, 99.9],
+            "CurPhaseA": [15.3, 16.1, 14.9],
+            "CurPhaseB": [15.5, 16.3, 15.1],
+            "CurPhaseC": [15.7, 16.5, 15.3],
+            "CurrentImbalance": [0.2, 0.3, 0.1],
+            "LineCurrent": [30.5, 32.1, 31.4],
+            "LineVoltage": [400, 405, 398],
+            "ActivePower": [75.2, 76.3, 74.1],
+            "EngineLoad": [80, 85, 78],
+            "InputVoltageAB": [220, 225, 218],
+            "InputVoltageBC": [225, 230, 223],
+            "InputVoltageCA": [215, 220, 213],
+            "IntakePressure": [25, 26, 24],
+            "EngineTemp": [57, 57, 57],
+            "LiquidTemp": [57, 57, 57],
+            "VibrationAccRadial": [0.5, 0.6, 0.4],
+            "VibrationAccAxial": [0.7, 0.8, 0.6],
+            "liquidflowRatio": [100, 105, 95],
+            "isolationResistance": [5000, 5100, 4950]
+        };
+
+        const parameterMappings = {
+            'Frequency': 'Частота вращения',
+            'CurPhaseA': 'Ток фазы A',
+            'CurPhaseB': 'Ток фазы B',
+            'CurPhaseC': 'Ток фазы C',
+            'CurrentImbalance': 'Дисбаланс токов',
+            'LineCurrent': 'Линейный ток (ток сети)',
+            'LineVoltage': 'Линейное напряжение (напряжение сети)',
+            'ActivePower': 'Активная мощность',
+            'EngineLoad': 'Загрузка ПЭД',
+            'InputVoltageAB': 'Напряжения AB',
+            'InputVoltageBC': 'Напряжения BC',
+            'InputVoltageCA': 'Напряжения CA',
+            'IntakePressure': 'Давление на приёме',
+            'EngineTemp': 'Температура ПЭД',
+            'LiquidTemp': 'Температура жидкости',
+            'VibrationAccRadial': 'Радиальные вибрации',
+            'VibrationAccAxial': 'Осевые вибрации',
+            'liquidflowRatio': 'Дебит жидкости',
+            'isolationResistance': 'Сопротивление изоляции'
+        };
+
+        function formatDate(dateStrings) {
+            return dateStrings.map(dateString => {
+                const date = new Date(dateString);
+                return date.toISOString().split('T')[0];
+            });
+        }
+
+        const checkboxList = document.getElementById('checkbox-list');
+        const parameterNames = Object.keys(parameterMappings);
+
+        parameterNames.forEach(param => {
+            const label = document.createElement('label');
+            label.classList.add('checkbox-label');
+            label.innerHTML = `<input type="checkbox" value="${param}">${parameterMappings[param]}`;
+            checkboxList.appendChild(label);
+        });
+
+        let selectedParams = [];
+        const chartContainer = document.getElementById('chart-container');
+        zingchart.render({
+            id: 'chart-container',
+            data: {
+                type: 'line',
+                series: []
+            }
+        });
+
+        checkboxList.addEventListener('change', function(event) {
+            const checkbox = event.target;
+            const paramName = checkbox.value;
+
+            if (checkbox.checked) {
+                selectedParams.push(paramName);
+            } else {
+                selectedParams = selectedParams.filter(param => param !== paramName);
+            }
+
+            updateChart();
+        });
+
+        function updateChart() {
+            const seriesData = selectedParams.map(param => {
+                return {
+                    values: jsonData[param],
+                    text: parameterMappings[param]
+                };
+            });
+
+            zingchart.exec('chart-container', 'setdata', {
+                data: {
+                    type: 'line',
+                    scaleX: {
+                        values: formatDate(jsonData['Date'])
+                    },
+                    series: seriesData
+                }
+            });
+        }
+    </script>
+</body>
+</html>

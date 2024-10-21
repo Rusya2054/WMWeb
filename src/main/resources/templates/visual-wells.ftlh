@@ -40,46 +40,18 @@
         }
     </style>
 <script>
-    function toFieds(){
-        requestData = {from: "init"}
-        fetch('/fields', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        }).then(response => {
-            if (response.ok){
-                window.location.href = response.url;
-            } else {
-                console.error('Ошибка при переходе');
-            }
-        });
-    }
 
-    function toVisual(){
-        requestData = {from: "visual"}
-        fetch('/fields', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        }).then(response => {
-            if (response.ok){
-                window.location.href = response.url;
-            } else {
-                console.error('Ошибка при переходе');
-            }
-        });
-    }
 </script>
 </head>
 <body>
-    <h1>База Данных Well Manager</h1>
+    <h1>Визуализация скважин</h1>
     <hr>
-    <input type="button" value="Исходные данные" onclick="toFieds()">
-    <input type="button" value="Менеджер данных" onclick="window.location.href='/pump-card'">
-    <input type="button" value="Визуализация данных" onclick="toVisual()">
+    <#if wellList?has_content>
+        <#list wellList as well>
+            <div class="well">
+                id: ${well.id} | ${well.name} <a href="/visual/${well.id?c}">Визуализация</a> </br>
+            </div>
+        </#list>
+    </#if>
 </body>
 </html>

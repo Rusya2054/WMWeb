@@ -38,6 +38,23 @@
             });
         }
 
+        function toVisual(field){
+            requestData = {field: field};
+            fetch('/visual', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            }).then(response => {
+                if (response.ok){
+                    window.location.href = response.url;
+                } else {
+                    console.error('Ошибка при переходе');
+                }
+            });
+        }
+
     </script>
     <style>
         body {
@@ -99,6 +116,15 @@
             <#list fields as field>
                 <#if field?has_content>
                         <button onclick="toInit('${field}')">${field}</button><br>
+                </#if>
+            </#list>
+        </#if>
+    </#if>
+    <#if from?has_content && from == "visual">
+        <#if fields?has_content>
+            <#list fields as field>
+                <#if field?has_content>
+                        <button onclick="toVisual('${field}')">${field}</button><br>
                 </#if>
             </#list>
         </#if>
