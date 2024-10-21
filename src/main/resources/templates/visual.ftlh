@@ -22,6 +22,8 @@
         </div>
     </div>
 <script>
+    let seriesData = [];
+    let selectedParams = [];
     function initCheckbox(){
         const parameterMappings = {
             'Frequency': 'Частота вращения',
@@ -41,8 +43,8 @@
             'LiquidTemp': 'Температура жидкости',
             'VibrationAccRadial': 'Радиальные вибрации',
             'VibrationAccAxial': 'Осевые вибрации',
-            'liquidflowRatio': 'Дебит жидкости',
-            'isolationResistance': 'Сопротивление изоляции'
+            'LiquidflowRatio': 'Дебит жидкости',
+            'IsolationResistance': 'Сопротивление изоляции'
         };
         const checkboxList = document.getElementById('checkbox-list');
         const parameterNames = Object.keys(parameterMappings);
@@ -52,10 +54,32 @@
             const paramName = checkbox.value;
 
             if (checkbox.checked) {
-                selectedParams.push(paramName);
                 updateChart(paramName);
             } else {
-                selectedParams = selectedParams.filter(param => param !== paramName);
+                seriesData = seriesData.filter(series => series.text !== paramName);
+                var chartData = {
+                    type: 'line',
+                    scaleX: {
+                        label: { text: "Time" },
+                        transform: {
+                            type: 'date',
+                            all: '%d.%M.%Y' // Формат даты
+                        },
+                        guide: { visible: false },
+                        item: { angle: -45 },
+                    },
+                    scaleY: {
+                        label: { text: "Value" }
+                    },
+                    series: seriesData // Используем обновленные линии данных
+                };
+
+                zingchart.render({
+                    id: 'chartContainer',
+                    data: chartData,
+                    height: 400,
+                    width: '100%'
+                });
             }
 
         });
@@ -76,7 +100,7 @@
     }
 
 
-    let selectedParams = [];
+
     const chartContainer = document.getElementById('chartContainer');
     zingchart.render({
         id: 'chartContainer',
@@ -107,7 +131,12 @@
         }).then(response => {
             return response.json();
         }).then(data=>{
-            const valuesArray = Object.keys(data).map(key => [key, data[key]]);
+            const valuesArray = Object.keys(data).map(key => [formatDate(key), data[key]]);
+
+            seriesData.push({
+                values: valuesArray,
+                text: requestData["parameter"]
+            });
 
             var chartData = {
                 type: 'line',
@@ -115,7 +144,7 @@
                     label: { text: "Time" },
                     transform: {
                       type: 'date',
-                      all: '%Y-%m-%d %H:%i:%s' // Формат даты и времени
+                      all: '%d.%M.%Y' // Формат даты и времени
                     },
                     guide: { visible: false },
                     item: { angle: -45 },
@@ -123,11 +152,7 @@
                 scaleY: {
                     label: { text: "Value" }
                 },
-                series: [
-                    {
-                      values: valuesArray
-                    }
-                ]
+                series: seriesData
             };
             zingchart.render({
               id: 'chartContainer',
@@ -136,6 +161,14 @@
               width: '100%'
             });
         });
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return day+"."+month+"."+year;
     }
 
 window.onload = initCheckbox;

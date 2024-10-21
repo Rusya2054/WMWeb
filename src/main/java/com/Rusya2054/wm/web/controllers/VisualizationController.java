@@ -28,7 +28,7 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 @SessionAttributes({"field"})
-public class VisulizationController {
+public class VisualizationController {
     private final IndicatorService indicatorService;
     private final WellService wellService;
     private final PumpCardService pumpCardService;
@@ -63,8 +63,8 @@ public class VisulizationController {
     @PostMapping("/visual/{id}")
     @ResponseBody
     public Map<LocalDateTime, Float> toVisual(@PathVariable Long id, @RequestBody RequestVisualData requestVisualData){
+        // TODO добавить очистку графиков, оси ОY настраивать,  название оси, стили добить, кнопка убрать все выдленное
         Well well = wellService.getWell(id);
-        // TODO: ленивая загрузка данных 1 к 10
         if (requestVisualData.getMinDate().isEmpty() || requestVisualData.getMaxDate().isEmpty()){
             return IndicatorMethodsInvoker.getDataByParameter(requestVisualData.getParameter(), indicatorService.getIndicators(well));
         } else {
