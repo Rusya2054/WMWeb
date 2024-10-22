@@ -119,7 +119,6 @@ public class DataManagerController {
                 } else{
                     Well finalDbWell = wellService.wellSave(well);
                     indicatorService.saveIndicators(indicators, finalDbWell);
-//                    this.sessionMemoryService.getSessionMemory().get(sessionID).remove(e.getKey());
                 }
             });
         }

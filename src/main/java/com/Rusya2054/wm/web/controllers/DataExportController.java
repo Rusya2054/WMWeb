@@ -16,8 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Controller
@@ -37,7 +35,7 @@ public class DataExportController {
     @GetMapping("/export")
     public String getExportPage(Model model){
         List<Well> wellList = wellService.getWellsByField((String) model.asMap().get("field"));
-        List<WellWrapper> wellWrapperList = indicatorService.createWellWrappers(wellList, formatter);
+        List<WellWrapper> wellWrapperList = indicatorService.getWellWrappterFromDateTimeMinMaxMap(wellList, formatter);
         Map<String, List<WellWrapper>> wellListMap = wellList
                 .stream()
                 .map(well -> {

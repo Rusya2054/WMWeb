@@ -84,11 +84,12 @@
     <hr>
     <div id="container">
         <div id="left-panel" class="tool-group">
-            с <input type="date" name="minDate"> до <input type="date" name="maxDate"> <br><br>
+            с <input type="date" name="minDate"><br><br>
+            до <input type="date" name="maxDate"> <br><br>
             от <input type="number" id="minValue" placeholder="минимальное значение" oninput="axeOYHandler()"> <br><br>
             до <input type="number" id="maxValue" placeholder="максимальное значение" oninput="axeOYHandler()"> <br>
             <br>
-            <input type="button" value="Очистить параметры" oninput="сlearParameters()"><br>
+            <input type="button" value="Очистить параметры" onclick="сlearParameters()"><br>
             <dib id="text">
                 Параметры
             </dib><br>

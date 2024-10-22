@@ -1,26 +1,22 @@
 package com.Rusya2054.wm.web.services;
 
+import com.Rusya2054.wm.web.containers.DateTimeIntervalsContainer;
 import com.Rusya2054.wm.web.files.transfer.IndicatorWrapper;
 import com.Rusya2054.wm.web.files.transfer.WellWrapper;
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.repositories.IndicatorRepository;
 import com.Rusya2054.wm.web.validators.DateTimeValidator;
-import com.Rusya2054.wm.web.validators.DateTimeValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -49,7 +45,6 @@ public class IndicatorService {
         Set<Indicator> indicatorsToUpload = new TreeSet<>(Comparator.comparing(Indicator::getDateTime));
         indicatorsToUpload.addAll(indicators);
 
-
          Map<LocalDateTime, Indicator> dbIndicatorMap = dbIndicators.stream()
         .collect(Collectors.toMap(Indicator::getDateTime, Function.identity(), (existing, replacement) -> existing));
 
@@ -57,8 +52,10 @@ public class IndicatorService {
             .filter(indicator -> !dbIndicatorMap.containsKey(indicator.getDateTime()))
             .collect(Collectors.toList());
 
+
         if (!toSave.isEmpty()) {
             indicatorRepository.saveAll(toSave);
+            DateTimeIntervalsContainer.updateDateTimeMinMaxMap(well, this.getIndicatorMinDate(well), this.getIndicatorMaxDate(well));
         }
     }
 
@@ -72,6 +69,18 @@ public class IndicatorService {
         }
     }
 
+
+    public List<WellWrapper> getWellWrappterFromDateTimeMinMaxMap(List<Well> wellList, DateTimeFormatter formatter) {
+
+        return wellList.stream()
+                .map(well -> {
+                        Map<String, LocalDateTime> map = DateTimeIntervalsContainer.getDateTimeMinMaxMap().get(well.getId());
+                        LocalDateTime minDateTime = map.get("minDateTime");
+                        LocalDateTime maxDateTime = map.get("maxDateTime");
+                        return new WellWrapper(well, minDateTime.format(formatter), maxDateTime.format(formatter));
+                    })
+                .toList();
+    }
 
     public List<WellWrapper> createWellWrappers(List<Well> wellList, DateTimeFormatter formatter) {
         List<CompletableFuture<WellWrapper>> futures = wellList.stream()

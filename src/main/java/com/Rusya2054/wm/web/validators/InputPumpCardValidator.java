@@ -38,10 +38,10 @@ public class InputPumpCardValidator {
             pumpCard.setPumpDepth(depthVal);
         }
         if (!typeSize.isEmpty()){
-            pumpCard.setTypeSize(typeSize);
+            pumpCard.setTypeSize(typeSize.trim());
         }
         if (!field.isEmpty() && (pumpCard.getWell().getField() == null) || (pumpCard.getWell().getField() != null && !pumpCard.getWell().getField().equalsIgnoreCase(field)) ){
-            pumpCard.getWell().setField(field);
+            pumpCard.getWell().setField(field.trim());
         }
 
     }

@@ -41,17 +41,11 @@ public class DeleteWellController {
         Well well = wellService.getWell(id);
 
         if (id<0){
-            List<WellWrapper> wellWrapperList = wellService.getWellList().stream().map(w -> new WellWrapper(w,
-                    indicatorService.getIndicatorMinDate(w).format(formatter),
-                    indicatorService.getIndicatorMaxDate(w).format(formatter))).toList();
+            List<WellWrapper> wellWrapperList = indicatorService.getWellWrappterFromDateTimeMinMaxMap(wellService.getWellList(), formatter);
             redirectAttributes.addFlashAttribute("wellWrapperList", wellWrapperList);
             return "redirect:/well/delete";
         } else if (well.getName() != null && !well.getName().isEmpty()) {
-            List<WellWrapper> wellWrapperList = wellService.getWellsByName(well).stream()
-                    .filter(w->w.getId().equals(id))
-                    .map(w -> new WellWrapper(w,
-                        indicatorService.getIndicatorMinDate(w).format(formatter),
-                        indicatorService.getIndicatorMaxDate(w).format(formatter))).toList();
+            List<WellWrapper> wellWrapperList = indicatorService.getWellWrappterFromDateTimeMinMaxMap(wellService.getWellsByName(well), formatter);
             redirectAttributes.addFlashAttribute("wellWrapperList", wellWrapperList);
             return "redirect:/well/delete";
         } else {

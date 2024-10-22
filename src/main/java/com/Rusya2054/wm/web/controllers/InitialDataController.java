@@ -4,11 +4,13 @@ import com.Rusya2054.wm.web.controllers.request.RequestFieldData;
 import com.Rusya2054.wm.web.controllers.request.RequestInitData;
 import com.Rusya2054.wm.web.files.transfer.IndicatorWrapper;
 import com.Rusya2054.wm.web.files.transfer.WellWrapper;
+import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.PumpCard;
 import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.services.IndicatorService;
 import com.Rusya2054.wm.web.services.PumpCardService;
 import com.Rusya2054.wm.web.services.WellService;
+import com.Rusya2054.wm.web.validators.DateTimeValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -68,10 +70,10 @@ public class InitialDataController {
         Well well = wellService.getWell(id);
         PumpCard pumpCard = pumpCardService.getPumpCardByWell(well);
         List<IndicatorWrapper> indicators = indicatorService.getIndicatorWrapper(well).stream().limit(50).toList();
-        // TODO: задать возможно выбрать интервал и чтобы он отображался и не слетал стиль
         model.addAttribute("well", well);
         model.addAttribute("pumpCard", pumpCard);
         model.addAttribute("indicators", indicators);
+        // TODO: сессионные минимальные и максимальные даты
         model.addAttribute("wellWrapper", new WellWrapper(well,
                 indicatorService.getIndicatorMinDate(well).format(formatter),
                 indicatorService.getIndicatorMaxDate(well).format(formatter)));
@@ -79,21 +81,22 @@ public class InitialDataController {
     }
     @PostMapping("/init/{id}")
     @ResponseBody
-    public Map<Long, List<IndicatorWrapper>> initWellPageUpdateData(@RequestBody RequestInitData requestInitData, @PathVariable Long id){
+    public Map<String, List<IndicatorWrapper>> initWellPageUpdateData(@RequestBody RequestInitData requestInitData, @PathVariable Long id){
         Well well = wellService.getWell(id);
-        // TODO: проблема с передачей данных
-        LocalDateTime minDate = LocalDate.parse(requestInitData.getMinDate(), formatter).atStartOfDay();
-        LocalDateTime maxDate = LocalDate.parse(requestInitData.getMaxDate(), formatter).plusDays(1L).atStartOfDay();
-        // TODO: добавить валидатор дат
-        List<IndicatorWrapper> indicators = indicatorService.getIndicatorWrapper(well)
-                .stream()
-                .filter(ww->(ww.getDateTime().isAfter(minDate) && ww.getDateTime().isBefore(maxDate)))
-                .limit(50)
-                .toList();
-        // TODO: задать возможно выбрать интервал и чтобы он отображался и не слетал стиль
-        Map<Long, List<IndicatorWrapper>> resonseMap = new HashMap<>(1);
-        resonseMap.put(id, indicators);
-        return resonseMap;
+        if (!requestInitData.getMaxDate().isEmpty() || !requestInitData.getMaxDate().isEmpty()){
+            LocalDateTime minDateTime = LocalDate.parse(requestInitData.getMinDate(), formatter).atStartOfDay();
+            LocalDateTime maxDateTime = LocalDate.parse(requestInitData.getMaxDate(), formatter).plusDays(1L).atStartOfDay();
+            LocalDateTime[] localDateTimes = DateTimeValidator.sortDateTimes(minDateTime, maxDateTime);
+            LocalDateTime validatedMinDateTime = localDateTimes[0];
+            LocalDateTime validatedMaxDateTime = localDateTimes[1];
+            List<IndicatorWrapper> indicators = indicatorService.getIndicatorWrapper(well)
+                    .stream()
+                    .filter(ww->(ww.getDateTime().isAfter(validatedMinDateTime) && ww.getDateTime().isBefore(validatedMaxDateTime)))
+                    .limit(requestInitData.getRowNumbers())
+                    .toList();
+            return new HashMap<>(1){{put("data", indicators);}};
+        }
+            return new HashMap<>(1){{put("data", List.of());}};
     }
 
 }

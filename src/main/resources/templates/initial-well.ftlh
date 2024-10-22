@@ -81,15 +81,29 @@
         -webkit-appearance: none; /* Убираем стрелки */
         margin: 0; /* Убираем отступы */
     }
+
+    input[type="button"] {
+        background-color: #007bff;
+        color: white;
+        border: none;
+
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+        width: auto; /* Убираем фиксированную ширину */
+    }
+
+    input[type="button"]:hover {
+        background-color: #0056b3;
+    }
 </style>
 <script>
     function numberInputHandler(element){
-        console.log(element.value);
         if (element.value < 50){
             element.value = 50;
         }
-        if (element.value > 10000){
-            element.value = 10000;
+        if (element.value > 100000){
+            element.value = 100000;
         }
     }
     function updateData(){
@@ -100,10 +114,10 @@
         requestData = {
             minDate: minDateElement.value,
             maxDate: maxDateElement.value,
-            nRows: nRowsValue,
+            rowNumbers: nRowsValue,
         }
-        console.log(requestData);
-        fetch('/init/${well.id}', {
+
+        fetch('/init/${well.id?c}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -115,11 +129,41 @@
             })
     }
     function updateTable(data){
-        const tableData = data[${well.id?c}];
-        console.log(tableData.keys());
+
+        const tableData = data["data"];
+
         var tableContent = document.querySelector('table[id="wellTable"]');
-        tableContent.innerHTML = "";
-        
+        var tbody = tableContent.querySelector('tbody');
+        tbody.innerHTML = "";
+        data["data"].forEach(item => {
+            var row = document.createElement('tr');
+            row.innerHTML =
+                "<td>" + item.well.name + "</td>" +
+                "<td>" + item.strDateTime + "</td>" +
+                "<td>" + item.rotationDirection + "</td>" +
+                "<td>" + item.frequency + "</td>" +
+                "<td>" + item.curPhaseA + "</td>" +
+                "<td>" + item.curPhaseB + "</td>" +
+                "<td>" + item.curPhaseC + "</td>" +
+                "<td>" + item.curPhaseC + "</td>" +
+                "<td>" + item.currentImbalance + "</td>" +
+                "<td>" + item.lineCurrent + "</td>" +
+                "<td>" + item.lineVoltage + "</td>" +
+                "<td>" + item.activePower + "</td>" +
+                "<td>" + item.totalPower + "</td>" +
+                "<td>" + item.powerFactor + "</td>" +
+                "<td>" + item.engineLoad + "</td>" +
+                "<td>" + item.inputVoltageAB + "</td>" +
+                "<td>" + item.inputVoltageBC + "</td>" +
+                "<td>" + item.inputVoltageCA + "</td>" +
+                "<td>" + item.engineTemp + "</td>" +
+                "<td>" + item.engineTemp + "</td>" +
+                "<td>" + item.vibrationAccRadial + "</td>" +
+                "<td>" + item.vibrationAccAxial + "</td>" +
+                "<td>" + item.liquidFlowRatio + "</td>" +
+                "<td>" + item.isolationResistance + "</td>";
+        tbody.appendChild(row);
+        });
     }
 </script>
 <body>
@@ -127,7 +171,7 @@
     <h2>Типоразмер: <#if pumpCard.typeSize?has_content>${pumpCard.typeSize}<#else> Нет информации</#if>; Глубина спуска: <#if pumpCard.pumpDepth?has_content>${pumpCard.pumpDepth}<#else> Нет информации</#if>; Последняя дата отказа: <#if pumpCard.lastFailureDate?has_content>${pumpCard.lastFailureDate}<#else> Нет информации</#if></h2>
     <hr>
     <div class="tool-group">
-        <input type="date" name="minDate" value="${wellWrapper.minDate}" onchange="updateData()"> | <input type="date" name="maxDate" value="${wellWrapper.maxDate}" onchange="updateData()"> | <input type="number" value="50" name="rowNumber" oninput="numberInputHandler(this)">
+        <input type="date" name="minDate" value="${wellWrapper.minDate}"> | <input type="date" name="maxDate" value="${wellWrapper.maxDate}"> | <input type="number" value="50" name="rowNumber" oninput="numberInputHandler(this)"> | <input type="button" value="Построить" onclick="updateData()">
     </div>
     </br>
     <table id="wellTable">

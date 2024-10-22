@@ -6,5 +6,5 @@ import lombok.Data;
 public class RequestInitData {
     private String minDate;
     private String maxDate;
-    private Long nRows;
+    private Integer rowNumbers;
 }
