@@ -2,6 +2,7 @@ package com.Rusya2054.wm.web.files.transfer;
 
 import com.Rusya2054.wm.web.models.Indicator;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.TreeMap;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Data
 public class IndicatorMethodsInvoker {
     private static Integer lazyPlotParameter = 10;
@@ -38,8 +40,7 @@ public class IndicatorMethodsInvoker {
                 }
             });
         } catch (NoSuchMethodException e) {
-            // TODO: Добавить в логг
-            System.err.println("Method not found: " + e.getMessage());
+            log.error("Method not found: {}", e.getMessage());
         }
         return result;
     }
@@ -63,8 +64,7 @@ public class IndicatorMethodsInvoker {
                 }
             });
         } catch (NoSuchMethodException e) {
-            // TODO: Добавить в логг
-            System.err.println("Method not found: " + e.getMessage());
+            log.error("Method not found: {} for full history", e.getMessage());
         }
         return result;
     }

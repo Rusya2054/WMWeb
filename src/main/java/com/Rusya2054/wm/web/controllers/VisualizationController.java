@@ -63,7 +63,6 @@ public class VisualizationController {
     @PostMapping("/visual/{id}")
     @ResponseBody
     public Map<LocalDateTime, Float> toVisual(@PathVariable Long id, @RequestBody RequestVisualData requestVisualData){
-        // TODO добавить очистку графиков, оси ОY настраивать,  название оси, стили добить, кнопка убрать все выдленное
         Well well = wellService.getWell(id);
         if (requestVisualData.getMinDate().isEmpty() || requestVisualData.getMaxDate().isEmpty()){
             return IndicatorMethodsInvoker.getDataByParameter(requestVisualData.getParameter(), indicatorService.getIndicators(well));

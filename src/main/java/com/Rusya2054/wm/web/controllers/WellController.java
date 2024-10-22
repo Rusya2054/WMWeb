@@ -43,9 +43,7 @@ public class WellController {
     @GetMapping("/fields")
     public String getFieldsPage(Model model) {
         List<String> fields = wellService.getUniqueFields();
-        // TODO: рассортировать месторождения по названию
         model.addAttribute("fields", fields);
-        // TODO: если длина 1 то переход на основную страницу
         return "fields";
     }
 

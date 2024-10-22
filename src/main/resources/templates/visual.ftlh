@@ -4,17 +4,94 @@
     <meta charset="UTF-8">
     <title>WMWeb</title>
 <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+<style>
+    body {
+        background-color: #f0f8ff; /* Светлый фон */
+    }
 
+    h1, h2 {
+        color: #007bff; /* Цвет заголовка */
+        margin-bottom: 10px; /* Отступ снизу */
+        text-align: center;
+    }
+
+    hr {
+        width: 100%;
+        border: 1px solid #007bff; /* Цвет линии */
+        margin: 10px 0; /* Отступы для линии */
+    }
+    #container {
+        display: flex;
+        height: 100vh; /* Высота контейнера на всю высоту экрана */
+    }
+    #left-panel {
+        width: 20%; /* Левая панель займет 20% ширины */
+        padding: 20px;
+        box-sizing: border-box;
+        background-color: #f0f8ff; /* Светлый фон */
+    }
+
+    #right-panel {
+        width: 80%; /* Правая панель займет 80% ширины */
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    #chartContainer {
+        width: 100%;
+        height: 100%; /* Займет всю доступную высоту и ширину родителя */
+        background-color: #f0f8ff; /* Светлый фон */
+    }
+
+    input[type="date"] {
+            padding: 5px;
+            margin: 0 5px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+        }
+    input[type="number"] {
+            padding: 5px;
+            margin: 0 5px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            text-align: center; /* Центрируем текст */
+            -moz-appearance: textfield;
+        }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none; /* Убираем стрелки */
+        margin: 0; /* Убираем отступы */
+    }
+    input[type="button"] {
+        background-color: #007bff;
+        color: white;
+        border: none;
+
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+        width: auto; /* Убираем фиксированную ширину */
+    }
+
+    input[type="button"]:hover {
+        background-color: #0056b3;
+    }
+</style>
 </head>
 <body>
     <h1>ID: ${well.id}; Имя скважины: ${well.name}; Месторождение: <#if well.field?has_content>${well.field}<#else>м-е отсутствует</#if></h1>
     <h2>Типоразмер: <#if pumpCard.typeSize?has_content>${pumpCard.typeSize}<#else> Нет информации</#if>; Глубина спуска: <#if pumpCard.pumpDepth?has_content>${pumpCard.pumpDepth}<#else> Нет информации</#if>; Последняя дата отказа: <#if pumpCard.lastFailureDate?has_content>${pumpCard.lastFailureDate}<#else> Нет информации</#if></h2>
     <hr>
-    <hr>
     <div id="container">
-        <div id="left-panel">
-            <input type="date" name="minDate" > | <input type="date" name="maxDate"> <br>
-            <h3>Параметр</h3>
+        <div id="left-panel" class="tool-group">
+            с <input type="date" name="minDate"> до <input type="date" name="maxDate"> <br><br>
+            от <input type="number" id="minValue" placeholder="минимальное значение" oninput="axeOYHandler()"> <br><br>
+            до <input type="number" id="maxValue" placeholder="максимальное значение" oninput="axeOYHandler()"> <br>
+            <br>
+            <input type="button" value="Очистить параметры" oninput="сlearParameters()"><br>
+            <dib id="text">
+                Параметры
+            </dib><br>
             <div id="checkbox-list"></div>
         </div>
         <div id="right-panel">
@@ -25,6 +102,7 @@
     let seriesData = [];
     let selectedParams = [];
     function initCheckbox(){
+        plotGraph([]);
         const parameterMappings = {
             'Frequency': 'Частота вращения',
             'CurPhaseA': 'Ток фазы A',
@@ -43,7 +121,7 @@
             'LiquidTemp': 'Температура жидкости',
             'VibrationAccRadial': 'Радиальные вибрации',
             'VibrationAccAxial': 'Осевые вибрации',
-            'LiquidflowRatio': 'Дебит жидкости',
+            'LiquidFlowRatio': 'Дебит жидкости',
             'IsolationResistance': 'Сопротивление изоляции'
         };
         const checkboxList = document.getElementById('checkbox-list');
@@ -54,32 +132,10 @@
             const paramName = checkbox.value;
 
             if (checkbox.checked) {
-                updateChart(paramName);
+                updateChart(paramName, parameterMappings[paramName]);
             } else {
                 seriesData = seriesData.filter(series => series.text !== paramName);
-                var chartData = {
-                    type: 'line',
-                    scaleX: {
-                        label: { text: "Time" },
-                        transform: {
-                            type: 'date',
-                            all: '%d.%M.%Y' // Формат даты
-                        },
-                        guide: { visible: false },
-                        item: { angle: -45 },
-                    },
-                    scaleY: {
-                        label: { text: "Value" }
-                    },
-                    series: seriesData // Используем обновленные линии данных
-                };
-
-                zingchart.render({
-                    id: 'chartContainer',
-                    data: chartData,
-                    height: 400,
-                    width: '100%'
-                });
+                plotGraph(seriesData);
             }
 
         });
@@ -110,9 +166,7 @@
         }
     });
 
-
-
-    function updateChart(col) {
+    function updateChart(col, ruCol) {
         const minDateInput = document.querySelector('input[name="minDate"]');
         const maxDateInput = document.querySelector('input[name="maxDate"]');
 
@@ -120,6 +174,7 @@
             minDate: minDateInput.value,
             maxDate: maxDateInput.value,
             parameter: col,
+            ruParameter: ruCol
         }
 
         fetch('/visual/${well.id}', {
@@ -135,31 +190,10 @@
 
             seriesData.push({
                 values: valuesArray,
-                text: requestData["parameter"]
+                text: requestData["ruParameter"]
             });
 
-            var chartData = {
-                type: 'line',
-                    scaleX: {
-                    label: { text: "Time" },
-                    transform: {
-                      type: 'date',
-                      all: '%d.%M.%Y' // Формат даты и времени
-                    },
-                    guide: { visible: false },
-                    item: { angle: -45 },
-                },
-                scaleY: {
-                    label: { text: "Value" }
-                },
-                series: seriesData
-            };
-            zingchart.render({
-              id: 'chartContainer',
-              data: chartData,
-              height: 400,
-              width: '100%'
-            });
+            plotGraph(seriesData);
         });
     }
 
@@ -171,6 +205,64 @@
         return day+"."+month+"."+year;
     }
 
+    function сlearParameters() {
+        const checkboxList = document.getElementById('checkbox-list');
+        const checkboxes = checkboxList.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+        seriesData = [];
+        plotGraph(seriesData);
+        zingchart.exec('chartContainer', 'clear');
+    }
+
+    function plotGraph(inputData, min, max){
+        const config = {
+            type: 'scatter',
+            backgroundColor: 'transparent',
+            plotarea: {
+                backgroundColor: 'transparent'
+            },
+            series: inputData,
+            legend: {
+                visible: true,
+                backgroundColor: 'white',
+                borderWidth: 1,
+                borderColor: 'black',
+                item: {
+                    fontColor: 'black'
+                }
+            }
+        };
+
+        if (min !== undefined || max !== undefined) {
+            config.scaleY = {};
+            if (min !== undefined) {
+                config.scaleY.minValue = min;
+            }
+            if (max !== undefined) {
+                config.scaleY.maxValue = max;
+            }
+        }
+
+         zingchart.render({
+            id: 'chartContainer',
+            data: config
+        });
+    }
+
+    function axeOYHandler() {
+        const minValueNumber = Number(document.getElementById('minValue').value);
+        const maxValueNumber = Number(document.getElementById('maxValue').value);
+        if (typeof minValueNumber === 'number' && !isNaN(minValueNumber) && typeof maxValueNumber === 'number' && !isNaN(maxValueNumber)){
+            console.log(0);
+            if (minValueNumber < maxValueNumber){
+                console.log(minValueNumber);
+                console.log(maxValueNumber);
+                plotGraph(seriesData, minValueNumber, maxValueNumber);
+            }
+        }
+    }
 window.onload = initCheckbox;
 </script>
 </body>
