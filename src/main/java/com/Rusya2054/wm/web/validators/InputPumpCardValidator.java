@@ -4,9 +4,10 @@ import com.Rusya2054.wm.web.models.PumpCard;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 public class InputPumpCardValidator {
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private static LocalDate lastFailureDateParser(String lastFailureDate){
         try {
@@ -40,8 +41,10 @@ public class InputPumpCardValidator {
         if (!typeSize.isEmpty()){
             pumpCard.setTypeSize(typeSize.trim());
         }
-        if (!field.isEmpty() && (pumpCard.getWell().getField() == null) || (pumpCard.getWell().getField() != null && !pumpCard.getWell().getField().equalsIgnoreCase(field)) ){
-            pumpCard.getWell().setField(field.trim());
+        String inputField = Optional.ofNullable(field).orElse("");
+        String currentField = Optional.ofNullable(pumpCard.getWell().getField()).orElse("");
+        if (!inputField.isEmpty() && !currentField.equalsIgnoreCase(inputField)){
+            pumpCard.getWell().setField(inputField.trim());
         }
 
     }

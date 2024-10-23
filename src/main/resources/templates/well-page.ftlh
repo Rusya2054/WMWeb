@@ -37,6 +37,14 @@
             border-radius: 5px; /* Скругленные углы */
         }
 
+        input[type="date"], input[type="submit"] {
+            width: 80%; /* Полная ширина для полей ввода */
+            padding: 10px;
+            margin: 10px 0; /* Отступы между полями */
+            border: 1px solid #007bff; /* Граница поля */
+            border-radius: 5px; /* Скругленные углы */
+        }
+
         #deleteBtn, input[type="submit"] {
             background-color: #007bff; /* Цвет кнопки */
             color: white; /* Цвет текста кнопки */
@@ -119,9 +127,9 @@
         </#if>
         Последняя дата отказа:
         <#if pumpCard.lastFailureDate?has_content>
-            <input type="text" placeholder="${lastFailureDate}" name="lastFailureDate" oninput="inputDateHandler(this)"/><br>
+            <input type="date" value="${lastFailureDate}" name="lastFailureDate"/><br>
         <#else>
-            <input type="text" placeholder="ДД.MM.ГГГГ" name="lastFailureDate" oninput="inputDateHandler(this)"/><br>
+            <input type="date" placeholder="ДД.MM.ГГГГ" name="lastFailureDate"/><br>
         </#if>
         <input type="submit" value="Обновить данные"/>
     </form>

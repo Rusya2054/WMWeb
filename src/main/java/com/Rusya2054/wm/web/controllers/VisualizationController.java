@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,12 @@ public class VisualizationController {
         model.addAttribute("well", well);
         model.addAttribute("pumpCard", pumpCard);
         model.addAttribute("indicators", indicators);
+        if (pumpCard.getLastFailureDate() != null && pumpCard.getLastFailureDate() instanceof LocalDate){
+            LocalDate lastFailureDate = pumpCard.getLastFailureDate();
+            LocalDate today = LocalDate.now();
+            Long daysBetween = ChronoUnit.DAYS.between(lastFailureDate, today);
+            model.addAttribute("repairInterval", daysBetween);
+        }
         return "visual";
     }
 

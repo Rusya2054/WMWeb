@@ -41,7 +41,6 @@ public class InitialDataController {
     @GetMapping("/init")
     public String getInitialData(Model model){
         List<Well> wellList = wellService.getWellsByField((String) model.asMap().get("field"));
-        // TODO: добавить ассиноое вычисление максимальных и минимальных дат
         List<WellWrapper> wellWrapperList = indicatorService.createWellWrappers(wellList, formatter);
         Map<String, List<WellWrapper>> wellListMap = wellList
                 .stream()

@@ -80,7 +80,11 @@
 </head>
 <body>
     <h1>ID: ${well.id}; Имя скважины: ${well.name}; Месторождение: <#if well.field?has_content>${well.field}<#else>м-е отсутствует</#if></h1>
-    <h2>Типоразмер: <#if pumpCard.typeSize?has_content>${pumpCard.typeSize}<#else> Нет информации</#if>; Глубина спуска: <#if pumpCard.pumpDepth?has_content>${pumpCard.pumpDepth}<#else> Нет информации</#if>; Последняя дата отказа: <#if pumpCard.lastFailureDate?has_content>${pumpCard.lastFailureDate}<#else> Нет информации</#if></h2>
+    <h2>Типоразмер: <#if pumpCard.typeSize?has_content>${pumpCard.typeSize}<#else> Нет информации</#if>;
+    Глубина спуска: <#if pumpCard.pumpDepth?has_content>${pumpCard.pumpDepth}<#else> Нет информации</#if>;
+Последняя дата отказа: <#if pumpCard.lastFailureDate?has_content>${pumpCard.lastFailureDate}<#else> Нет информации</#if>
+<#if repairInterval?has_content>; МРП: ${repairInterval?c} суток</#if>
+</h2>
     <hr>
     <div id="container">
         <div id="left-panel" class="tool-group">
@@ -135,8 +139,12 @@
             if (checkbox.checked) {
                 updateChart(paramName, parameterMappings[paramName]);
             } else {
-                seriesData = seriesData.filter(series => series.text !== paramName);
+                console.log(seriesData);
+                console.log(paramName);
+                console.log(parameterMappings[paramName]);
+                seriesData = seriesData.filter(series => series.text !== parameterMappings[paramName]);
                 plotGraph(seriesData);
+                console.log(seriesData);
             }
 
         });
@@ -188,12 +196,11 @@
             return response.json();
         }).then(data=>{
             const valuesArray = Object.keys(data).map(key => [formatDate(key), data[key]]);
-
             seriesData.push({
                 values: valuesArray,
                 text: requestData["ruParameter"]
             });
-
+            console.log(seriesData);
             plotGraph(seriesData);
         });
     }
@@ -203,7 +210,9 @@
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
-        return day+"."+month+"."+year;
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return date.getTime();
     }
 
     function сlearParameters() {
@@ -219,7 +228,7 @@
 
     function plotGraph(inputData, min, max){
         const config = {
-            type: 'scatter',
+            type: 'line',
             backgroundColor: 'transparent',
             plotarea: {
                 backgroundColor: 'transparent'
@@ -227,17 +236,55 @@
             series: inputData,
             legend: {
                 visible: true,
-                backgroundColor: 'white',
+                backgroundColor: 'transparent',
                 borderWidth: 1,
                 borderColor: 'black',
                 item: {
                     fontColor: 'black'
                 }
+            },
+            scaleX: {
+                lineColor: '#000000',
+                lineWidth: 1,
+                transform: {
+                    type: 'date',
+                    all: '%dd.%mm.%y %H:%i:%s',
+                    itemsOverlap: false,
+                },
+                zooming: true,
+                item: {
+                    bold: true,
+                    fontColor: '#000000',
+                    fontSize: 10
+                },
+                guide: {
+                    lineStyle: 'solid',
+                    lineColor: '#000000',
+                }
+            },
+            scaleY: {
+                lineColor: '#000000',
+                lineWidth: 1,
+                zooming: true,
+                item: {
+                    bold: true,
+                    fontColor: '#000000',
+                    fontSize: 10
+                },
+                guide: {
+                  lineStyle: 'solid',
+                  lineColor: '#000000',
+                }
+            },
+            tooltip: {
+                text: '%t: %v'
             }
         };
 
         if (min !== undefined || max !== undefined) {
-            config.scaleY = {};
+            config.scaleY = {
+                zooming: true,
+            };
             if (min !== undefined) {
                 config.scaleY.minValue = min;
             }
@@ -256,10 +303,7 @@
         const minValueNumber = Number(document.getElementById('minValue').value);
         const maxValueNumber = Number(document.getElementById('maxValue').value);
         if (typeof minValueNumber === 'number' && !isNaN(minValueNumber) && typeof maxValueNumber === 'number' && !isNaN(maxValueNumber)){
-            console.log(0);
             if (minValueNumber < maxValueNumber){
-                console.log(minValueNumber);
-                console.log(maxValueNumber);
                 plotGraph(seriesData, minValueNumber, maxValueNumber);
             }
         }

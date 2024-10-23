@@ -33,7 +33,7 @@ public class DateTimeIntervalsContainer {
             }};
              dateTimeMinMaxMap.put(well.getId(), map);
         });
-        log.info("DateTimeMinMaxMap initialized");
+        log.info("DateTimeIntervalsContainer.dateTimeMinMaxMap initialized");
     }
 
     public static void updateDateTimeMinMaxMap(Well well, LocalDateTime minValue, LocalDateTime maxValue){
