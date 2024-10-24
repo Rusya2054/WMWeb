@@ -84,7 +84,6 @@
 <script>
     function selectButtonHandler(){
         const checkboxes = document.querySelectorAll('input[type="checkbox"][name="option"][value="option"]');
-        console.log(checkboxes);
         checkboxes.forEach((checkbox) => {
             checkbox.checked = true;
         });

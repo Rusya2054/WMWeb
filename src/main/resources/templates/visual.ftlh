@@ -139,12 +139,8 @@
             if (checkbox.checked) {
                 updateChart(paramName, parameterMappings[paramName]);
             } else {
-                console.log(seriesData);
-                console.log(paramName);
-                console.log(parameterMappings[paramName]);
                 seriesData = seriesData.filter(series => series.text !== parameterMappings[paramName]);
                 plotGraph(seriesData);
-                console.log(seriesData);
             }
 
         });
@@ -200,7 +196,6 @@
                 values: valuesArray,
                 text: requestData["ruParameter"]
             });
-            console.log(seriesData);
             plotGraph(seriesData);
         });
     }
@@ -302,6 +297,10 @@
     function axeOYHandler() {
         const minValueNumber = Number(document.getElementById('minValue').value);
         const maxValueNumber = Number(document.getElementById('maxValue').value);
+        if (minValueNumber == "" && maxValueNumber == ""){
+            plotGraph(seriesData);
+        }
+
         if (typeof minValueNumber === 'number' && !isNaN(minValueNumber) && typeof maxValueNumber === 'number' && !isNaN(maxValueNumber)){
             if (minValueNumber < maxValueNumber){
                 plotGraph(seriesData, minValueNumber, maxValueNumber);
