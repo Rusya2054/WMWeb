@@ -66,7 +66,7 @@
 <script>
     function dublicateWellsValidate(){
         const requestData = {}
-        const blocks = document.querySelectorAll('form');
+        const blocks = document.querySelectorAll("form[id='wellForm']");
 
         blocks.forEach((block) => {
             const selected_input = block.querySelector('input[name="option"]:checked')
@@ -78,6 +78,7 @@
             }
             requestData[block.name] = locData;
         });
+
         fetch('/well-dublicates/upload', {
                 method: 'POST',
                 headers: {
@@ -98,7 +99,7 @@
 
     <#list duplicateWellMap?keys as wells>
         <#if duplicateWellMap[wells]?has_content>
-            <form name="${wells}">
+            <form name="${wells}" id="wellForm">
                     <#list duplicateWellMap[wells] as well>
                         <label>
                             <input type="radio"  name="option" value="${duplicateWellMap[wells][0].name}" id="${well.id}"> ${well.id} | ${well.name} |

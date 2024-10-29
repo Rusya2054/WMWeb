@@ -31,7 +31,10 @@ public class DataManagerController {
 
     @GetMapping("/pump-card")
     public String getDataManager(Model model){
-        model.addAttribute("wellList", wellService.getWellList());
+        List<Well> wellList = wellService.getWellList();
+        wellList.sort(Comparator.comparing(Well::getId));
+        wellList.sort(Comparator.comparing(Well::getField));
+        model.addAttribute("wellList", wellList);
         return "data-manager";
     }
 

@@ -41,26 +41,7 @@ public class InitialDataController {
     @GetMapping("/init")
     public String getInitialData(Model model){
         List<Well> wellList = wellService.getWellsByField((String) model.asMap().get("field"));
-        List<WellWrapper> wellWrapperList = indicatorService.createWellWrappers(wellList, formatter);
-        Map<String, List<WellWrapper>> wellListMap = wellList
-                .stream()
-                .map(well -> {
-                    var field = well.getField();
-                    return Objects.requireNonNullElse(field, "м-е отсутствует");
-                })
-                .distinct()
-                .collect(Collectors
-                        .toMap(key -> key,
-                                key ->
-                                wellWrapperList
-                                .stream()
-                                .filter(well -> {
-                                    return Objects.requireNonNullElse(well.getField(), "м-е отсутствует").equals(key);
-                                    }).toList(),
-                                (existing, replacement) -> existing,
-                                () -> new TreeMap<String, List<WellWrapper>>(String::compareTo)
-                                ));
-        model.addAttribute("wellListMap", wellListMap);
+        model.addAttribute("wellList", wellList);
         return "initial";
     }
 

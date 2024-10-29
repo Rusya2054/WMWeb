@@ -17,6 +17,6 @@ public interface WellRepository extends JpaRepository<Well, Long> {
     @Query(value = "SELECT DISTINCT field FROM wells", nativeQuery = true)
     List<String> findUniqueFields();
 
-    @Query(value = "SELECT w.id from wells w where w.field = :field", nativeQuery = true)
+    @Query(value = "SELECT w.id from wells w where w.field = :field ORDER BY w.id", nativeQuery = true)
     List<Long> findWellsByField(@Param("field") String field);
 }
