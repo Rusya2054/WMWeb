@@ -20,6 +20,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -31,7 +34,14 @@ public class DataManagerController {
 
     @GetMapping("/pump-card")
     public String getDataManager(Model model){
-        List<Well> wellList = wellService.getWellList();
+        List<Well> wellList = wellService.getWellList().stream().peek(new Consumer<Well>() {
+            @Override
+            public void accept(Well well) {
+                if (well.getField() == null){
+                    well.setField("м-е отсутствует");
+                }
+            }
+        }).collect(Collectors.toList());
         wellList.sort(Comparator.comparing(Well::getId));
         wellList.sort(Comparator.comparing(Well::getField));
         model.addAttribute("wellList", wellList);
