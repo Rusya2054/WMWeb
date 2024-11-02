@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @author Rusya2054
+ */
 @Repository
 public interface PumpCardRepository extends JpaRepository<PumpCard, Long> {
     PumpCard findByWell(Well well);

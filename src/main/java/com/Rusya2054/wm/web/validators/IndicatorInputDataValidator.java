@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * @author Rusya2054
+ */
 public final class IndicatorInputDataValidator {
 
 

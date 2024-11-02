@@ -20,7 +20,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-
+/**
+ * @author Rusya2054
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -55,6 +57,7 @@ public class IndicatorService {
 
         if (!toSave.isEmpty()) {
             indicatorRepository.saveAll(toSave);
+            log.info("Well: {} is saved", well);
             DateTimeIntervalsContainer.updateDateTimeMinMaxMap(well, this.getIndicatorMinDate(well), this.getIndicatorMaxDate(well));
         }
     }

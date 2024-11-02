@@ -5,7 +5,8 @@ import com.Rusya2054.wm.web.files.template.Columns;
 import java.util.*;
 
 /**
- * static classe for parsing file columns
+ * static class for parsing file columns
+ * @author Rusya2054
  */
 public final class InputFileParser {
 

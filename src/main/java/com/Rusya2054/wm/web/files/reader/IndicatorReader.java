@@ -6,7 +6,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * @author Rusya2054
+ */
 public final class IndicatorReader {
     public static List<String> readIndicatorsFile(MultipartFile f) throws IOException {
         List<String> strings = new ArrayList<>(500000);

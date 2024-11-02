@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author Rusya2054
+ */
 @Repository
 public interface WellRepository extends JpaRepository<Well, Long> {
 

@@ -11,6 +11,9 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * @author Rusya2054
+ */
 @Repository
 public interface IndicatorRepository extends JpaRepository<Indicator, Long> {
     List<Indicator> findByWell(Well well);

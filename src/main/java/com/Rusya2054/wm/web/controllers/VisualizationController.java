@@ -3,7 +3,6 @@ package com.Rusya2054.wm.web.controllers;
 import com.Rusya2054.wm.web.controllers.request.RequestFieldData;
 import com.Rusya2054.wm.web.controllers.request.RequestVisualData;
 import com.Rusya2054.wm.web.files.transfer.IndicatorMethodsInvoker;
-import com.Rusya2054.wm.web.files.transfer.IndicatorWrapper;
 import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.PumpCard;
 import com.Rusya2054.wm.web.models.Well;
@@ -17,13 +16,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+/**
+ * @author Rusya2054
+ */
 @Controller
 @RequiredArgsConstructor
 @SessionAttributes({"field"})

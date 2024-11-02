@@ -4,7 +4,9 @@ import com.Rusya2054.wm.web.models.Indicator;
 import lombok.Data;
 
 import java.time.format.DateTimeFormatter;
-
+/**
+ * @author Rusya2054
+ */
 @Data
 public class IndicatorWrapper extends Indicator {
     private String strDateTime;

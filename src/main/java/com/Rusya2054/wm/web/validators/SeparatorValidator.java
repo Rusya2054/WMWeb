@@ -1,5 +1,8 @@
 package com.Rusya2054.wm.web.validators;
 
+/**
+ * @author Rusya2054
+ */
 public class SeparatorValidator{
 
     public static String validate(String sep){

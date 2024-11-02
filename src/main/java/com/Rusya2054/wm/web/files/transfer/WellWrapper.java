@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * @author Rusya2054
+ */
 @Data
 public class WellWrapper extends Well {
     private String maxDate;

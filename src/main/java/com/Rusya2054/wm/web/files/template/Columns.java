@@ -3,7 +3,9 @@ package com.Rusya2054.wm.web.files.template;
 import lombok.Data;
 import lombok.Getter;
 
-
+/**
+ * @author Rusya2054
+ */
 public final class Columns {
     @Getter
     private final static String wellID = "WellID";

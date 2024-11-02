@@ -4,7 +4,6 @@ import com.Rusya2054.wm.web.controllers.request.RequestFieldData;
 import com.Rusya2054.wm.web.controllers.request.RequestInitData;
 import com.Rusya2054.wm.web.files.transfer.IndicatorWrapper;
 import com.Rusya2054.wm.web.files.transfer.WellWrapper;
-import com.Rusya2054.wm.web.models.Indicator;
 import com.Rusya2054.wm.web.models.PumpCard;
 import com.Rusya2054.wm.web.models.Well;
 import com.Rusya2054.wm.web.services.IndicatorService;
@@ -21,8 +20,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
-
+/**
+ * @author Rusya2054
+ */
 @Controller
 @RequiredArgsConstructor
 @SessionAttributes({"field"})
