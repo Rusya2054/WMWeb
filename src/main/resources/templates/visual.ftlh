@@ -230,10 +230,13 @@
             },
             series: inputData,
             legend: {
+                align: 'center',
                 visible: true,
                 backgroundColor: 'transparent',
                 borderWidth: 1,
-                borderColor: 'black',
+                layout: "4x5",
+                verticalAlign: 'bottom',
+                borderColor: 'transparent',
                 item: {
                     fontColor: 'black'
                 }
