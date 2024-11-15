@@ -54,19 +54,20 @@ public class DataManagerController {
     public String uploadIndicators(@RequestParam(value = "files[]", required = false) List<MultipartFile> files, Model model){
         Map<String, List<String>> uploadedIndicatorsFiles = new HashMap<>(files.size());
         Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(files.size());
-        files.stream()
-                .filter(f->(f.getOriginalFilename().endsWith(".txt")| f.getOriginalFilename().endsWith(".data")))
-                .forEach(f->{
-            try {
+        Iterator<MultipartFile> fileIterator = files.iterator();
+
+        while (fileIterator.hasNext()){
+            MultipartFile f = fileIterator.next();
+            if (f.getOriginalFilename().endsWith(".txt")| f.getOriginalFilename().endsWith(".data")){
                 List<String> uploadedFile = IndicatorReader.readIndicatorsFile(f);
                 if (uploadedFile.size() > 20){
                     uploadedIndicatorsFiles.put(f.getOriginalFilename(), uploadedFile);
                     uploadedParsedIndicatorsFiles.put(f.getOriginalFilename(), InputFileParser.parseIndicatorsFile(uploadedFile, "\t", 20));
                 }
-            } catch (Exception e) {
-                e.getMessage();
             }
-        });
+            fileIterator.remove();
+        }
+        files.clear();
         if (!uploadedIndicatorsFiles.isEmpty()){
             Long sessionID = sessionMemoryService.addToMemory(uploadedIndicatorsFiles);
             model.addAttribute("sessionID", sessionID);
