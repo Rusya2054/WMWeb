@@ -1,6 +1,5 @@
 package com.Rusya2054.wm.web.services;
 
-import com.Rusya2054.wm.web.containers.DateTimeIntervalsContainer;
 import com.Rusya2054.wm.web.files.transfer.IndicatorWrapper;
 import com.Rusya2054.wm.web.files.transfer.WellWrapper;
 import com.Rusya2054.wm.web.models.Indicator;
@@ -58,7 +57,6 @@ public class IndicatorService {
         if (!toSave.isEmpty()) {
             indicatorRepository.saveAll(toSave);
             log.info("Well: {} is saved", well);
-            DateTimeIntervalsContainer.updateDateTimeMinMaxMap(well, this.getIndicatorMinDate(well), this.getIndicatorMaxDate(well));
         }
     }
 
@@ -77,9 +75,8 @@ public class IndicatorService {
 
         return wellList.stream()
                 .map(well -> {
-                        Map<String, LocalDateTime> map = DateTimeIntervalsContainer.getDateTimeMinMaxMap().get(well.getId());
-                        LocalDateTime minDateTime = map.get("minDateTime");
-                        LocalDateTime maxDateTime = map.get("maxDateTime");
+                        LocalDateTime minDateTime = getIndicatorMinDate(well);
+                        LocalDateTime maxDateTime = getIndicatorMaxDate(well);
                         return new WellWrapper(well, minDateTime.format(formatter), maxDateTime.format(formatter));
                     })
                 .toList();
