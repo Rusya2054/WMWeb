@@ -1,5 +1,6 @@
 package com.Rusya2054.wm.web.controllers;
 
+import com.Rusya2054.wm.web.controllers.comparator.WellNameComparator;
 import com.Rusya2054.wm.web.validators.IndicatorInputDataValidator;
 import com.Rusya2054.wm.web.validators.SeparatorValidator;
 import com.Rusya2054.wm.web.files.parser.InputFileParser;
@@ -33,6 +34,7 @@ public class DataManagerController {
     private final WellService wellService;
     private final IndicatorService indicatorService;
     private final SessionMemoryService sessionMemoryService;
+    private final WellNameComparator wellNameComparator;
 
     @GetMapping("/pump-card")
     public String getDataManager(Model model){
@@ -44,7 +46,7 @@ public class DataManagerController {
                 }
             }
         }).collect(Collectors.toList());
-        wellList.sort(Comparator.comparing(Well::getId));
+        wellList.sort(wellNameComparator);
         wellList.sort(Comparator.comparing(Well::getField));
         model.addAttribute("wellList", wellList);
         return "data-manager";

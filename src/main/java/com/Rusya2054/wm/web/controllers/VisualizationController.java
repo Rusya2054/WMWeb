@@ -1,5 +1,6 @@
 package com.Rusya2054.wm.web.controllers;
 
+import com.Rusya2054.wm.web.controllers.comparator.WellNameComparator;
 import com.Rusya2054.wm.web.controllers.request.RequestFieldData;
 import com.Rusya2054.wm.web.controllers.request.RequestVisualData;
 import com.Rusya2054.wm.web.files.transfer.IndicatorMethodsInvoker;
@@ -33,7 +34,7 @@ public class VisualizationController {
     private final WellService wellService;
     private final PumpCardService pumpCardService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
+    private final WellNameComparator wellNameComparator;
 
     @PostMapping("/visual")
     public String visualHandler(@RequestBody RequestFieldData requestFieldData, RedirectAttributes redirectAttributes){
@@ -43,7 +44,8 @@ public class VisualizationController {
 
     @GetMapping("/visual")
     public String getVisualWells(Model model){
-        List<Well> wellList = wellService.getWellsByField((String) model.asMap().get("field"));
+        List<Well> wellList = new ArrayList<>(wellService.getWellsByField((String) model.asMap().get("field")));
+        wellList.sort(wellNameComparator);
         model.addAttribute("wellList", wellList);
         return "visual-wells";
     }
