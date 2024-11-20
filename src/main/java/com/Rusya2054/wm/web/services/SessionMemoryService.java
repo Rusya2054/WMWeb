@@ -14,9 +14,9 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class SessionMemoryService {
-    private final Map<Long, Map<String, List<String>>> sessionMemory;
+    private final Map<Long, Map<String, byte[]>> sessionMemory;
 
-    public Long addToMemory(Map<String, List<String>> uploadedIndicatorsFiles){
+    public Long addToMemory(Map<String, byte[]> uploadedIndicatorsFiles){
         Long sessionID = (long)(Long.MAX_VALUE*Math.random());
         sessionMemory.put(sessionID, uploadedIndicatorsFiles);
         return sessionID;

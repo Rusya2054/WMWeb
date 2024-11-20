@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 /**
  * @author Rusya2054
@@ -44,5 +45,17 @@ public final class IndicatorReader {
         } catch (IOException exception){
         }
         return strings;
+    }
+
+    public static List<String> readIndicatorsFile(byte[] f){
+        String[] lines = {};
+        try {
+            String string = new String(f, "UTF-8");
+            lines = string.split("\n");
+
+        } catch (IOException ioException){
+
+        }
+        return new ArrayList<>(Arrays.asList(lines));
     }
 }

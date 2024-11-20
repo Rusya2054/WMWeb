@@ -47,7 +47,7 @@ public class IndicatorService {
         indicatorsToUpload.addAll(indicators);
 
          Map<LocalDateTime, Indicator> dbIndicatorMap = dbIndicators.stream()
-        .collect(Collectors.toMap(Indicator::getDateTime, Function.identity(), (existing, replacement) -> existing));
+        .collect(Collectors.toMap(Indicator::getDateTime, Function.identity(), (existing, replacement) -> replacement));
 
         List<Indicator> toSave = indicatorsToUpload.stream()
             .filter(indicator -> !dbIndicatorMap.containsKey(indicator.getDateTime()))
@@ -58,6 +58,10 @@ public class IndicatorService {
             indicatorRepository.saveAll(toSave);
             log.info("Well: {} is saved", well);
         }
+        dbIndicators.clear();
+        indicatorsToUpload.clear();
+        toSave.clear();
+        dbIndicatorMap.clear();
     }
 
     public LocalDateTime getIndicatorMaxDate(Well well){

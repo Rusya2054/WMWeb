@@ -1,6 +1,7 @@
 package com.Rusya2054.wm.web.controllers;
 
 import com.Rusya2054.wm.web.controllers.request.RequestFromData;
+import com.Rusya2054.wm.web.files.reader.IndicatorReader;
 import com.Rusya2054.wm.web.validators.IndicatorInputDataValidator;
 import com.Rusya2054.wm.web.validators.InputPumpCardValidator;
 import com.Rusya2054.wm.web.validators.SeparatorValidator;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -106,23 +108,28 @@ public class WellController {
     @PostMapping("/well-dublicates/upload")
     public String uploadWellDublicates(@RequestBody Map<String, RequestData> requestData, Model model){
         Long[] sessionID = {null};
-        requestData.forEach((key, value) -> {
-            sessionID[0] = value.getSessionID();
-            String separator = SeparatorValidator.validate(value.getSeparator());
+
+        Iterator<Map.Entry<String, RequestData>> requestDataIterator = requestData.entrySet().iterator();
+
+        while (requestDataIterator.hasNext()){
+            Map.Entry<String, RequestData> iteratorEntry = requestDataIterator.next();
+            sessionID[0] = iteratorEntry.getValue().getSessionID();
+            String separator = SeparatorValidator.validate(iteratorEntry.getValue().getSeparator());
             if (sessionMemoryService.getSessionMemory().containsKey(sessionID[0])){
-                Well well = wellService.getWell(value.getId(), value.getName());
-
-                Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemoryService.getSessionMemory().get(sessionID[0]);
-
+                Well well = wellService.getWell(iteratorEntry.getValue().getId(), iteratorEntry.getValue().getName());
+                List<String> stringsUploadedFiles = IndicatorReader.readIndicatorsFile(this.sessionMemoryService.getSessionMemory().get(sessionID[0]).get(iteratorEntry.getKey()));
                 Set<Indicator> indicators = IndicatorInputDataValidator.formIndicator(
-                        InputFileParser.parseIndicatorsFile(this.sessionMemoryService.getSessionMemory().get(sessionID[0]).get(key), separator),
+                        InputFileParser.parseIndicatorsFile(stringsUploadedFiles, separator),
                         separator,
                         true,
                         well
                         );
                 indicatorService.saveIndicators(indicators, well);
+                stringsUploadedFiles.clear();
+                indicators.clear();
             }
-        });
+            requestDataIterator.remove();
+        }
         sessionMemoryService.getSessionMemory().remove(sessionID[0]);
         model.asMap().clear();
         model.addAttribute("wellList", wellService.getWellList());

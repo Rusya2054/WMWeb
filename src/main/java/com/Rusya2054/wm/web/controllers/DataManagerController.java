@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collector;
@@ -54,24 +55,28 @@ public class DataManagerController {
 
     @PostMapping("/pump-card/upload")
     public String uploadIndicators(@RequestParam(value = "files[]", required = false) List<MultipartFile> files, Model model){
-        Map<String, List<String>> uploadedIndicatorsFiles = new HashMap<>(files.size());
+        Long sessionID = sessionMemoryService.addToMemory(new HashMap<>(files.size()));
         Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(files.size());
         Iterator<MultipartFile> fileIterator = files.iterator();
 
         while (fileIterator.hasNext()){
             MultipartFile f = fileIterator.next();
             if (f.getOriginalFilename().endsWith(".txt")| f.getOriginalFilename().endsWith(".data")){
-                List<String> uploadedFile = IndicatorReader.readIndicatorsFile(f);
+                List<String> uploadedFile = IndicatorReader.readIndicatorsFile(f, 21);
                 if (uploadedFile.size() > 20){
-                    uploadedIndicatorsFiles.put(f.getOriginalFilename(), uploadedFile);
                     uploadedParsedIndicatorsFiles.put(f.getOriginalFilename(), InputFileParser.parseIndicatorsFile(uploadedFile, "\t", 20));
+                    // TODO: добавить байты
+                    try {
+                        sessionMemoryService.getSessionMemory().get(sessionID).put(f.getOriginalFilename(), f.getBytes());
+                    } catch (IOException ioException){
+                        log.warn("reading of file {} is throw IOException", f.getOriginalFilename());
+                    }
                 }
             }
             fileIterator.remove();
         }
         files.clear();
-        if (!uploadedIndicatorsFiles.isEmpty()){
-            Long sessionID = sessionMemoryService.addToMemory(uploadedIndicatorsFiles);
+        if (!uploadedParsedIndicatorsFiles.isEmpty()){
             model.addAttribute("sessionID", sessionID);
             model.addAttribute("separator", "\t");
             model.addAttribute("uploadedParsedIndicatorsFiles", uploadedParsedIndicatorsFiles);
@@ -91,17 +96,20 @@ public class DataManagerController {
     @PostMapping("/pump-card/upload/parse-indicators")
     @ResponseBody
     public Map<String, Object> dynamicParseIndicatorsFile(@RequestBody  RequestData requestData) {
+        // TODO: протестировать
         String separator = requestData.getSeparator();
         Long sessionID =requestData.getSessionID();
         Map<String, Object> response = new HashMap<>();
         if (this.sessionMemoryService.getSessionMemory().keySet().contains(sessionID)){
-            Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemoryService.getSessionMemory().get(sessionID);
+            Map<String, byte[]> uploadedIndicatorsFiles =  this.sessionMemoryService.getSessionMemory().get(sessionID);
+
             Map<String, List<String>> uploadedParsedIndicatorsFiles = new HashMap<>(uploadedIndicatorsFiles.size());
             uploadedIndicatorsFiles
                     .entrySet()
                     .stream()
                     .forEach(e->{
-                        uploadedParsedIndicatorsFiles.put(e.getKey(), InputFileParser.parseIndicatorsFile(e.getValue(), separator, 20));
+                        List<String> stringsUploadedFiles = IndicatorReader.readIndicatorsFile(e.getValue());
+                        uploadedParsedIndicatorsFiles.put(e.getKey(), InputFileParser.parseIndicatorsFile(stringsUploadedFiles, separator, 20));
                     });
             response.put("sessionID", sessionID);
             response.put("separator", separator);
@@ -123,13 +131,37 @@ public class DataManagerController {
         Map<String, List<Well>> duplicateWellMap = new HashMap<>(100);
 
         if (this.sessionMemoryService.getSessionMemory().containsKey(sessionID)){
-            Map<String, List<String>> uploadedIndicatorsFiles =  this.sessionMemoryService.getSessionMemory().get(sessionID);
+            Map<String, byte[]> uploadedIndicatorsFiles =  this.sessionMemoryService.getSessionMemory().get(sessionID);
+            Iterator<Map.Entry<String, byte[]>> uploadedIndicatorsFilesIterator = uploadedIndicatorsFiles.entrySet().iterator();
+
+            while (uploadedIndicatorsFilesIterator.hasNext()){
+                Map.Entry<String, byte[]> uploadedIndicatorsFilesEntry = uploadedIndicatorsFilesIterator.next();
+                final Well well = new Well();
+                if (byFileName) {
+                    well.setName(uploadedIndicatorsFilesEntry.getKey().split("\\.")[0]);
+                }
+                List<String> stringsUploadedFiles = IndicatorReader.readIndicatorsFile(uploadedIndicatorsFilesEntry.getValue());
+                Set<Indicator> indicators = IndicatorInputDataValidator.formIndicator(InputFileParser.parseIndicatorsFile(stringsUploadedFiles, separator),
+                        separator, byFileName, well);
+                List<Well> dbWellList = wellService.getWellsByName(well);
+                if (!dbWellList.isEmpty()){
+                    duplicateWellMap.put(uploadedIndicatorsFilesEntry.getKey(), dbWellList);
+                } else{
+                    Well finalDbWell = wellService.wellSave(well);
+                    indicatorService.saveIndicators(indicators, finalDbWell);
+                    stringsUploadedFiles.clear();
+                    indicators.clear();
+                    uploadedIndicatorsFilesIterator.remove();
+                }
+            }
+
             uploadedIndicatorsFiles.entrySet().forEach(e->{
                 final Well well = new Well();
                 if (byFileName) {
                     well.setName(e.getKey().split("\\.")[0]);
                 }
-                Set<Indicator> indicators = IndicatorInputDataValidator.formIndicator(InputFileParser.parseIndicatorsFile(e.getValue(), separator),
+                List<String> stringsUploadedFiles = IndicatorReader.readIndicatorsFile(e.getValue());
+                Set<Indicator> indicators = IndicatorInputDataValidator.formIndicator(InputFileParser.parseIndicatorsFile(stringsUploadedFiles, separator),
                         separator, byFileName, well);
                 List<Well> dbWellList = wellService.getWellsByName(well);
                 if (!dbWellList.isEmpty()){
