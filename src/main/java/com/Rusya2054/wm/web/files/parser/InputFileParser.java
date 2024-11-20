@@ -65,7 +65,12 @@ public final class InputFileParser {
                         result.add(String.join(sep, columnIndexMap
                                 .values()
                                 .stream()
-                                .map(v -> v.equals(-1) ? "0" : row[v])
+                                .map(v -> {
+                                    if (v < row.length){
+                                        return v.equals(-1) ? "0" : row[v];
+                                    }
+                                    return "0";
+                                })
                                 .toArray(String[]::new)));
             });
 
@@ -99,7 +104,12 @@ public final class InputFileParser {
                 result.add(String.join(sep, columnIndexMap
                         .values()
                         .stream()
-                        .map(v -> v.equals(-1) ? "0" : row[v])
+                        .map(v -> {
+                            if (v < row.length){
+                                return v.equals(-1) ? "0" : row[v];
+                            }
+                            return "0";
+                        })
                         .toArray(String[]::new)));
             });
             return result;
