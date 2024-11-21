@@ -39,7 +39,7 @@ public final class InputFileParser {
 
     public static List<String> parseIndicatorsFile(List<String> strings, String sep, int nRows){
         if (!strings.isEmpty()) {
-            List<String> columnHeades = Arrays.stream(strings.get(0).split(sep)).toList();
+            List<String> columnHeades = Arrays.stream(strings.get(0).split(sep)).map(s-> (s.contains("\n"))?s.replace("\n", ""):s).toList();
 
             // if columns finded, then index from columnHeades else -1
             Map<String, Integer> columnIndexMap = new LinkedHashMap<>(30);
@@ -83,7 +83,7 @@ public final class InputFileParser {
 
     public static List<String> parseIndicatorsFile(List<String> strings, String sep){
         if (!strings.isEmpty()){
-            List<String> columnHeades = Arrays.stream(strings.get(0).split(sep)).toList();
+            List<String> columnHeades = Arrays.stream(strings.get(0).split(sep)).map(s-> (s.contains("\n"))?s.replace("\n", ""):s).toList();
 
             // if columns finded, then index from columnHeades else -1
             Map<String, Integer> columnIndexMap = new LinkedHashMap<>(30);
@@ -105,7 +105,7 @@ public final class InputFileParser {
                         .values()
                         .stream()
                         .map(v -> {
-                            if (v < row.length){
+                            if (v <= row.length){
                                 return v.equals(-1) ? "0" : row[v];
                             }
                             return "0";
@@ -126,8 +126,9 @@ public final class InputFileParser {
         List<String> emptyList1 = new ArrayList<>();
         List<String> nullList = Arrays.asList("first", null, "second", "third", null);;
         List<String> well_164 = List.of(
-                "Номер\tДата, Время\tСобытие\tUвх.AB, В\tUвх.BC, В\tUвх.CA, В\tДисб.вх.U, %\tЧер.фаз\t№ кадра\tТобм, C\tUвых.пч, В\tFвых, Гц\tUвых. ТМПН, В\tIa ПЭД, А\tIb ПЭД, А\tIc ПЭД, А\tДисб.I ПЭД, %\tCos Ф\tЗагр.ПЭД, %\tRиз, кОм\tUdc, В\tPвх.эцн, кгс/см2\tPпэд, кгс/см2\tТвх.эцн, C\tTпэд, C\tТвых.эцн, C\tTпэд2, C\tВибр.XY, g\tВибр. Z, g\tFтурб, Гц\tАн.вх.1\tАн.вх.2\tIu, А\tАн.вх.3, ед.\tАн.вх.4, ед.\tIv, А\tIw, А\tНапр. вращ.\tТigbt, C\tРпэд, кВт\tSпэд, кВА\tЦифр.вх.\tРвх.су, кВт\tQвх.су, кВАр\tSвх.су, кВА\tВибр.X, g\tВибр.Y, g\tСост.ТМС\tPжидк.БВ, ат\tPбв, ат\tТжидк.БВ, C\tTбв, C\tВибр.X БВ, g\tВибр.Y БВ, g\tВибр.Z БВ, g\tТпер.бита, мс\tNвых, об/мин\tПричина записи\tСвязь ТМСП\tТип записи\n",
-                "1\t10.12.2023 23:40\tПараметры\t378\t381\t378\t0.5\tABC\t0\t40\t345\t47\t1366\t45342\t45370\t45492\t45414\t0.726\t60.1\t9999\t547\t45618\t655.35\t31\t40\t0\t0\t0\t0\t0\t0\t0\t78.6\t0\t0\t78.5\t79.1\tПрямое\t23\t35.6\t48.9\t100110\t0.5\t0\t0.6\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t2820\tПериод времени\t0\tНормальная\n");
+                "wellID\tRotationDirection\tDate\tFrequency\tCurPhaseA\tCurPhaseB\tCurPhaseC\tCurrentImbalance\tLineCurrent\tLineVoltage\tActivePower\tTotalPower\tPowerFactor\tEngineLoad\tInputVoltageAB\tInputVoltageBC\tInputVoltageCA\tIntakePressure\tEngineTemp\tLiquidTemp\tVibrationAccRadial\tVibrationAccAxial\tliquidflowRatio\tisolationResistance\n",
+                        "641\t\t2024-09-22 08:01:47\t46.0\t16.0\t16.1\t16.1\t0.0\t0\t318.0\t56.4\t0\t0.7\t56.0\t380.0\t383.0\t385.0\t33.63\t88.0\t88.0\t0.0\t0.0\t0.0\t9999.0\n",
+                        "641\t\t2024-09-22 08:03:00\t46.0\t16.0\t16.1\t16.1\t1.0\t0\t318.0\t56.4\t0\t0.7\t56.0\t384.0\t383.0\t385.0\t33.63\t88.0\t88.0\t0.0\t0.0\t0.0\t9999.0\n");
         // InputFileParser.parseIndicatorsFile(lst, "\t").stream().forEach(System.out::println);
         // InputFileParser.parseIndicatorsFile(nullList, "\t").stream().forEach(System.out::println);
         InputFileParser.parseIndicatorsFile(well_164, "\t").stream().forEach(System.out::println);
