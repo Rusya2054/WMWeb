@@ -39,7 +39,7 @@ public final class InputFileParser {
 
     public static List<String> parseIndicatorsFile(List<String> strings, String sep, int nRows){
         if (!strings.isEmpty()) {
-            List<String> columnHeades = Arrays.stream(strings.get(0).split(sep)).map(s-> (s.contains("\n"))?s.replace("\n", ""):s).toList();
+            List<String> columnHeades = Arrays.stream(strings.get(0).split(sep)).map(s-> (s.contains("\n"))?s.replace("\n", "").replace("\r", ""):s).toList();
 
             // if columns finded, then index from columnHeades else -1
             Map<String, Integer> columnIndexMap = new LinkedHashMap<>(30);
@@ -83,7 +83,7 @@ public final class InputFileParser {
 
     public static List<String> parseIndicatorsFile(List<String> strings, String sep){
         if (!strings.isEmpty()){
-            List<String> columnHeades = Arrays.stream(strings.get(0).split(sep)).map(s-> (s.contains("\n"))?s.replace("\n", ""):s).toList();
+            List<String> columnHeades = Arrays.stream(strings.get(0).split(sep)).map(s-> (s.contains("\n") || s.contains("\r"))?s.replace("\n", "").replace("\r", ""):s).toList();
 
             // if columns finded, then index from columnHeades else -1
             Map<String, Integer> columnIndexMap = new LinkedHashMap<>(30);
