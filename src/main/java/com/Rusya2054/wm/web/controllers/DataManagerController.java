@@ -39,6 +39,7 @@ public class DataManagerController {
 
     @GetMapping("/pump-card")
     public String getDataManager(Model model){
+
         List<Well> wellList = wellService.getWellList().stream().peek(new Consumer<Well>() {
             @Override
             public void accept(Well well) {

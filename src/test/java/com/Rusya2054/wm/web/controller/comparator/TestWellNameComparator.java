@@ -4,7 +4,6 @@ import com.Rusya2054.wm.web.controllers.comparator.WellNameComparator;
 import com.Rusya2054.wm.web.models.Well;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.util.Assert;
 
 
 public class TestWellNameComparator {

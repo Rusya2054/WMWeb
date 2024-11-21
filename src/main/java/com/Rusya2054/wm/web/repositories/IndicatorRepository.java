@@ -27,4 +27,7 @@ public interface IndicatorRepository extends JpaRepository<Indicator, Long> {
     @Query(value = "SELECT MIN(i.date_time) FROM indicators i WHERE i.well_id = :wellId", nativeQuery = true)
     LocalDateTime findMinDate(@Param("wellId") Long wellId);
 
+    @Query(value = "SELECT i.* FROM indicators i JOIN ( SELECT MAX(id) AS max_id FROM indicators WHERE well_id = :wellId) max_indicators ON i.id = max_indicators.max_id WHERE i.well_id = :wellId;", nativeQuery = true)
+    List<Indicator> findLastRowByWellId(@Param("wellId") Long wellId);
+
 }

@@ -59,6 +59,7 @@ public class VisualizationController {
         model.addAttribute("well", well);
         model.addAttribute("pumpCard", pumpCard);
         model.addAttribute("indicators", indicators);
+        model.addAttribute("measurability", indicatorService.getParameterMeasurability(id));
         if (pumpCard.getLastFailureDate() != null && pumpCard.getLastFailureDate() instanceof LocalDate){
             LocalDate lastFailureDate = pumpCard.getLastFailureDate();
             LocalDate today = LocalDate.now();

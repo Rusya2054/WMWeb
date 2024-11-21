@@ -1,5 +1,6 @@
 package com.Rusya2054.wm.web.services;
 
+import com.Rusya2054.wm.web.files.calculations.IndicatorMeasurability;
 import com.Rusya2054.wm.web.files.transfer.IndicatorWrapper;
 import com.Rusya2054.wm.web.files.transfer.WellWrapper;
 import com.Rusya2054.wm.web.models.Indicator;
@@ -74,6 +75,13 @@ public class IndicatorService {
         }
     }
 
+    public float getParameterMeasurability(Long id){
+        List<Indicator> indicators = indicatorRepository.findLastRowByWellId(id);
+        if (!indicators.isEmpty()){
+            return Math.round(IndicatorMeasurability.getParameterMeasurability(indicators.get(0))*100);
+        }
+        return Math.round(0.0f*100);
+    }
 
     public List<WellWrapper> getWellWrappterFromDateTimeMinMaxMap(List<Well> wellList, DateTimeFormatter formatter) {
 

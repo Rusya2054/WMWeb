@@ -83,7 +83,7 @@
     <h2>Типоразмер: <#if pumpCard.typeSize?has_content>${pumpCard.typeSize}<#else> Нет информации</#if>;
     Глубина спуска: <#if pumpCard.pumpDepth?has_content>${pumpCard.pumpDepth}<#else> Нет информации</#if>;
 Последняя дата отказа: <#if pumpCard.lastFailureDate?has_content>${pumpCard.lastFailureDate}<#else> Нет информации</#if>
-<#if repairInterval?has_content>; МРП: ${repairInterval?c} суток</#if>
+<#if repairInterval?has_content>; МРП: ${repairInterval?c} суток</#if> ${measurability}%
 </h2>
     <hr>
     <div id="container">
