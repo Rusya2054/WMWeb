@@ -74,14 +74,14 @@ public class VisualizationController {
     public Map<LocalDateTime, Float> toVisual(@PathVariable Long id, @RequestBody RequestVisualData requestVisualData){
         Well well = wellService.getWell(id);
         if (requestVisualData.getMinDate().isEmpty() || requestVisualData.getMaxDate().isEmpty()){
-            return IndicatorMethodsInvoker.getDataByParameter(requestVisualData.getParameter(), indicatorService.getIndicators(well));
+            return IndicatorMethodsInvoker.getDataByParameter(requestVisualData.getParameter(), indicatorService.getIndicators(well), requestVisualData.getInputLazyPlotCoeff());
         } else {
             LocalDateTime minDateTime = LocalDate.parse(requestVisualData.getMinDate(), formatter).atStartOfDay();
             LocalDateTime maxDateTime = LocalDate.parse(requestVisualData.getMaxDate(), formatter).plusDays(1L).atStartOfDay();
             LocalDateTime[] localDateTimes = DateTimeValidator.sortDateTimes(minDateTime, maxDateTime);
             LocalDateTime validatedMinDateTime = localDateTimes[0];
             LocalDateTime validatedMaxDateTime = localDateTimes[1];
-            return IndicatorMethodsInvoker.getDataByParameter(requestVisualData.getParameter(), indicatorService.getIndicators(well),validatedMinDateTime, validatedMaxDateTime);
+            return IndicatorMethodsInvoker.getDataByParameter(requestVisualData.getParameter(), indicatorService.getIndicators(well),validatedMinDateTime, validatedMaxDateTime, requestVisualData.getInputLazyPlotCoeff());
         }
     }
 }

@@ -76,6 +76,13 @@
     input[type="button"]:hover {
         background-color: #0056b3;
     }
+    #lazy-coeff{
+        background-color: #007bff;
+        color: white;
+        border: none;
+
+        border-radius: 3px;
+    }
 </style>
 </head>
 <body>
@@ -93,6 +100,13 @@
             от <input type="number" id="minValue" placeholder="минимальное значение" oninput="axeOYHandler()"> <br><br>
             до <input type="number" id="maxValue" placeholder="максимальное значение" oninput="axeOYHandler()"> <br>
             <br>
+            <select id="lazy-coeff">
+                <option value="100">100</option>
+                <option value="10" selected>10</option>
+                <option value="1">1</option>
+                <option value="0.1">0.1</option>
+                <option value="0.01">0.01</option>
+            </select><br>
             <input type="button" value="Очистить параметры" onclick="сlearParameters()"><br>
             <dib id="text">
                 Параметры
@@ -174,12 +188,14 @@
     function updateChart(col, ruCol) {
         const minDateInput = document.querySelector('input[name="minDate"]');
         const maxDateInput = document.querySelector('input[name="maxDate"]');
+        const lazyCoeff = Number(document.getElementById('lazy-coeff').value);
 
         requestData = {
             minDate: minDateInput.value,
             maxDate: maxDateInput.value,
             parameter: col,
-            ruParameter: ruCol
+            ruParameter: ruCol,
+            inputLazyPlotCoeff: lazyCoeff
         }
 
         fetch('/visual/${well.id}', {
@@ -211,6 +227,10 @@
     }
 
     function сlearParameters() {
+        let minValueNumber = document.getElementById('minValue');
+        let maxValueNumber = document.getElementById('maxValue');
+        minValueNumber = '';
+        maxValueNumber = '';
         const checkboxList = document.getElementById('checkbox-list');
         const checkboxes = checkboxList.querySelectorAll('input[type="checkbox"]');
         checkboxes.forEach((checkbox) => {

@@ -7,4 +7,5 @@ public class RequestVisualData {
     private String minDate;
     private String maxDate;
     private String parameter;
+    private Float inputLazyPlotCoeff;
 }

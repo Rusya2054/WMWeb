@@ -109,6 +109,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <jvmArguments>-XX:+PrintFlagsFinal -Xlog:gc*:file=gc.log -Xms2g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 XX:G1HeapRegionSize=32m -XX:InitiatingHeapOccupancyPercent=55 -XX:G1NewSizePercent=10 -XX:G1MaxNewSizePercent=50</jvmArguments>
+                </configuration>
             </plugin>
         </plugins>
     </build>
