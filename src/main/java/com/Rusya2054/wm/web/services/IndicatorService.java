@@ -36,6 +36,11 @@ public class IndicatorService {
     public List<Indicator> getIndicators(Well well){
         return indicatorRepository.findByWell(well);
     }
+
+    public List<Indicator> getIndicators(Well well, LocalDateTime minDateTime, LocalDateTime maxDateTime){
+        return indicatorRepository.findByWell(well).stream().filter(i->(i.getDateTime().isAfter(minDateTime) && i.getDateTime().isBefore(maxDateTime))).toList();
+    }
+
     public List<IndicatorWrapper> getIndicatorWrapper(Well well){
         return indicatorRepository.findByWell(well).stream().map(IndicatorWrapper::new).toList();
     }

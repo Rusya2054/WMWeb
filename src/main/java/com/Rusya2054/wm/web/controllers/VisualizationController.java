@@ -72,8 +72,9 @@ public class VisualizationController {
     @PostMapping("/visual/{id}")
     @ResponseBody
     public Map<LocalDateTime, Float> toVisual(@PathVariable Long id, @RequestBody RequestVisualData requestVisualData){
+        // TODO: добавить обработку для дебита
         Well well = wellService.getWell(id);
-        if (requestVisualData.getMinDate().isEmpty() || requestVisualData.getMaxDate().isEmpty()){
+        if (requestVisualData.getMinDate().isEmpty() && requestVisualData.getMaxDate().isEmpty()){
             return IndicatorMethodsInvoker.getDataByParameter(requestVisualData.getParameter(), indicatorService.getIndicators(well), requestVisualData.getInputLazyPlotCoeff());
         } else {
             LocalDateTime minDateTime = LocalDate.parse(requestVisualData.getMinDate(), formatter).atStartOfDay();
@@ -81,7 +82,7 @@ public class VisualizationController {
             LocalDateTime[] localDateTimes = DateTimeValidator.sortDateTimes(minDateTime, maxDateTime);
             LocalDateTime validatedMinDateTime = localDateTimes[0];
             LocalDateTime validatedMaxDateTime = localDateTimes[1];
-            return IndicatorMethodsInvoker.getDataByParameter(requestVisualData.getParameter(), indicatorService.getIndicators(well),validatedMinDateTime, validatedMaxDateTime, requestVisualData.getInputLazyPlotCoeff());
+            return IndicatorMethodsInvoker.getDataByParameter(requestVisualData.getParameter(), indicatorService.getIndicators(well, validatedMinDateTime, validatedMaxDateTime), requestVisualData.getInputLazyPlotCoeff());
         }
     }
 }

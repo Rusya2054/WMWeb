@@ -141,7 +141,8 @@
             'VibrationAccRadial': 'Радиальные вибрации',
             'VibrationAccAxial': 'Осевые вибрации',
             'LiquidFlowRatio': 'Дебит жидкости',
-            'IsolationResistance': 'Сопротивление изоляции'
+            'IsolationResistance': 'Сопротивление изоляции',
+            'LiquidFlowRatioSmoothed': 'Дебит жидкости сглаженный'
         };
         const checkboxList = document.getElementById('checkbox-list');
         const parameterNames = Object.keys(parameterMappings);

@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.Rusya2054.wm.web</groupId>
     <artifactId>wm.web</artifactId>
-    <version>0.0.7</version>
+    <version>0.0.10</version>
     <name>web.example</name>
     <description>My pet-project for web</description>
     <url/>
